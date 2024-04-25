@@ -5,15 +5,26 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
+    <View
+        android:id="@+id/photocardBorder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/photocard_border_normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="W,1:1.55"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/photocardImageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="W,1:1.55"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:scaleType="centerCrop" />
+        android:padding="4dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/photocardBorder"
+        app:layout_constraintEnd_toEndOf="@id/photocardBorder"
+        app:layout_constraintStart_toStartOf="@id/photocardBorder"
+        app:layout_constraintTop_toTopOf="@id/photocardBorder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

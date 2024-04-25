@@ -4,16 +4,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.tksproductions.pcollect.databinding.ActivityPhotocardBinding
 
-class PhotocardActivity : AppCompatActivity() {
+class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClickListener {
 
     private lateinit var binding: ActivityPhotocardBinding
     private lateinit var photocardAdapter: PhotocardAdapter
     private val photocardList = mutableListOf<Photocard>()
+    private val selectedPhotocards = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,22 +24,33 @@ class PhotocardActivity : AppCompatActivity() {
 
         setupRecyclerView()
         setupAddPhotocardButton()
+        setupCategorizeButton()
 
         val idolName = intent.getStringExtra("idolName") ?: return
         loadPhotocards(idolName)
     }
 
     private fun setupRecyclerView() {
-        photocardAdapter = PhotocardAdapter(photocardList)
+        photocardAdapter = PhotocardAdapter(photocardList, this)
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@PhotocardActivity, 2)
             adapter = photocardAdapter
         }
     }
 
+    override fun isPhotocardSelected(position: Int): Boolean {
+        return selectedPhotocards.contains(position)
+    }
+
     private fun setupAddPhotocardButton() {
         binding.addPhotocardButton.setOnClickListener {
             showAddPhotocardOptions()
+        }
+    }
+
+    private fun setupCategorizeButton() {
+        binding.categorizeButton.setOnClickListener {
+            showCategorizeOptions()
         }
     }
 
@@ -96,6 +109,50 @@ class PhotocardActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onPhotocardClick(position: Int) {
+        if (selectedPhotocards.contains(position)) {
+            selectedPhotocards.remove(position)
+        } else {
+            selectedPhotocards.add(position)
+        }
+        updateUI()
+    }
+
+    private fun updateUI() {
+        if (selectedPhotocards.isEmpty()) {
+            binding.addPhotocardButton.visibility = View.VISIBLE
+            binding.categorizeButton.visibility = View.GONE
+        } else {
+            binding.addPhotocardButton.visibility = View.GONE
+            binding.categorizeButton.visibility = View.VISIBLE
+        }
+        photocardAdapter.notifyDataSetChanged()
+    }
+
+    private fun showCategorizeOptions() {
+        val options = arrayOf("Collected", "Wishlisted", "Normal")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Categorize Photocards")
+        builder.setItems(options) { dialog, which ->
+            when (which) {
+                0 -> categorizePhotocards(true, false)
+                1 -> categorizePhotocards(false, true)
+                2 -> categorizePhotocards(false, false)
+            }
+            selectedPhotocards.clear()
+            updateUI()
+        }
+        builder.show()
+    }
+
+    private fun categorizePhotocards(isCollected: Boolean, isWishlisted: Boolean) {
+        selectedPhotocards.forEach { position ->
+            photocardList[position].isCollected = isCollected
+            photocardList[position].isWishlisted = isWishlisted
+        }
+        photocardAdapter.notifyDataSetChanged()
     }
 
     companion object {
