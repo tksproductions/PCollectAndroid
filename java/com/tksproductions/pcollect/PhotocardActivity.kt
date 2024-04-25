@@ -1,13 +1,18 @@
 package com.tksproductions.pcollect
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityPhotocardBinding
 
 class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClickListener {
@@ -16,6 +21,10 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     private lateinit var photocardAdapter: PhotocardAdapter
     private val photocardList = mutableListOf<Photocard>()
     private val selectedPhotocards = mutableListOf<Int>()
+    private lateinit var idolName: String
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+        .create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,8 +35,8 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         setupAddPhotocardButton()
         setupCategorizeButton()
 
-        val idolName = intent.getStringExtra("idolName") ?: return
-        loadPhotocards(idolName)
+        idolName = intent.getStringExtra("idolName") ?: return
+        loadPhotocards()
     }
 
     private fun setupRecyclerView() {
@@ -54,15 +63,24 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         }
     }
 
-    private fun loadPhotocards(idolName: String) {
-        val directory = getExternalFilesDir("Photocards/$idolName") ?: return
-        directory.listFiles()?.filter { it.isFile && it.name.endsWith(".jpg") }?.forEach { file ->
-            photocardList.add(Photocard(Uri.fromFile(file), false, false, file.name))
+    private fun loadPhotocards() {
+        val sharedPreferences = getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+        val photocardListJson = sharedPreferences.getString("${idolName}_photocardList", null)
+        if (photocardListJson != null) {
+            val type = object : TypeToken<List<Photocard>>() {}.type
+            val savedPhotocardList = gson.fromJson<List<Photocard>>(photocardListJson, type)
+            photocardList.clear()
+            photocardList.addAll(savedPhotocardList)
+            photocardAdapter.notifyDataSetChanged()
         }
+    }
 
-        photocardList.sortWith(compareBy<Photocard> { it.isWishlisted }.thenBy { it.isCollected }.thenBy { it.name })
-
-        photocardAdapter.notifyDataSetChanged()
+    private fun savePhotocards() {
+        val sharedPreferences = getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val photocardListJson = gson.toJson(photocardList)
+        editor.putString("${idolName}_photocardList", photocardListJson)
+        editor.apply()
     }
 
     private fun showAddPhotocardOptions() {
@@ -79,12 +97,13 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun importPhotocardFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.type = "image/*"
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
         startActivityForResult(intent, REQUEST_PHOTOCARD_IMPORT)
     }
 
     private fun openPhotocardCatalog() {
-        val idolName = intent.getStringExtra("idolName") ?: return
         val intent = Intent(this, PhotocardCatalogActivity::class.java)
         intent.putExtra("idolName", idolName)
         startActivityForResult(intent, REQUEST_PHOTOCARD_PICK)
@@ -97,17 +116,22 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                 REQUEST_PHOTOCARD_IMPORT -> {
                     val selectedImageUri = data.data
                     if (selectedImageUri != null) {
+                        val contentResolver = applicationContext.contentResolver
+                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
                         photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                        savePhotocards()
                         photocardAdapter.notifyDataSetChanged()
                     }
                 }
                 REQUEST_PHOTOCARD_PICK -> {
                     val selectedPhotocards = data.getStringArrayListExtra("selectedPhotocards") ?: return
-                    val idolName = intent.getStringExtra("idolName") ?: return
                     selectedPhotocards.forEach { photocardName ->
                         val photocardUri = Uri.parse("file:///android_asset/Photocards/$idolName/$photocardName")
                         photocardList.add(Photocard(photocardUri, false, false, photocardName))
                     }
+                    savePhotocards()
                     photocardAdapter.notifyDataSetChanged()
                 }
             }
@@ -145,6 +169,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                 2 -> categorizePhotocards(false, false)
             }
             selectedPhotocards.clear()
+            savePhotocards()
             updateUI()
         }
         builder.show()

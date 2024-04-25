@@ -2,6 +2,7 @@ package com.tksproductions.pcollect
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,6 +13,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -21,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private val idolList = mutableListOf<Idol>()
     private var selectedImageUri: Uri? = null
     private lateinit var addButton: View
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+        .create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnAddIdol.setOnClickListener {
             showAddIdolDialog()
         }
+
+        loadIdols()
     }
 
     private fun showAddIdolDialog() {
@@ -68,6 +79,7 @@ class MainActivity : AppCompatActivity() {
                 if (idolName.isNotEmpty() && selectedImageUri != null) {
                     val newIdol = Idol(idolName, selectedImageUri!!)
                     idolList.add(newIdol)
+                    saveIdols()
                     idolAdapter.notifyItemInserted(idolList.size - 1)
                     selectedImageUri = null
                     alertDialog.dismiss()
@@ -81,8 +93,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK)
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.type = "image/*"
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
         startActivityForResult(intent, REQUEST_IMAGE_PICK)
     }
 
@@ -95,11 +108,38 @@ class MainActivity : AppCompatActivity() {
             val idolImageView = dialogView.findViewById<ImageView>(R.id.idolImageView)
             val selectImageTextView = dialogView.findViewById<TextView>(R.id.selectImageTextView)
 
+            selectedImageUri?.let { uri ->
+                val contentResolver = applicationContext.contentResolver
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            }
+
             idolImageView.setImageURI(selectedImageUri)
             selectImageTextView.visibility = View.GONE
 
             addButton.isEnabled = true
         }
+    }
+
+    private fun loadIdols() {
+        val sharedPreferences = getSharedPreferences("IdolPrefs", Context.MODE_PRIVATE)
+        val idolListJson = sharedPreferences.getString("idolList", null)
+        if (idolListJson != null) {
+            val type = object : TypeToken<List<Idol>>() {}.type
+            val savedIdolList = gson.fromJson<List<Idol>>(idolListJson, type)
+            idolList.clear()
+            idolList.addAll(savedIdolList)
+            idolAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun saveIdols() {
+        val sharedPreferences = getSharedPreferences("IdolPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val idolListJson = gson.toJson(idolList)
+        editor.putString("idolList", idolListJson)
+        editor.apply()
     }
 
     companion object {
@@ -109,3 +149,13 @@ class MainActivity : AppCompatActivity() {
 
 data class Idol(var name: String, var imageUri: Uri)
 data class Photocard(var imageUri: Uri, var isCollected: Boolean, var isWishlisted: Boolean, var name: String)
+
+class UriTypeAdapter : TypeAdapter<Uri>() {
+    override fun write(out: JsonWriter, value: Uri?) {
+        out.value(value.toString())
+    }
+
+    override fun read(`in`: JsonReader): Uri {
+        return Uri.parse(`in`.nextString())
+    }
+}
