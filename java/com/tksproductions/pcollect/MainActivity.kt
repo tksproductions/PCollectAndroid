@@ -59,8 +59,7 @@ class MainActivity : AppCompatActivity() {
         val idolImageView = dialogView.findViewById<ImageView>(R.id.idolImageView)
         val selectImageTextView = dialogView.findViewById<TextView>(R.id.selectImageTextView)
 
-        val alertDialog = AlertDialog.Builder(this)
-            .setTitle("Add Idol")
+        val alertDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
             .setView(dialogView)
             .setPositiveButton("Add", null)
             .setNegativeButton("Cancel") { _, _ ->
@@ -81,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             addButton.setOnClickListener {
                 val idolName = idolNameEditText.text.toString()
                 if (idolName.isNotEmpty() && selectedImageUri != null) {
-                    // Check if the idol name already exists
                     if (idolList.any { it.name == idolName }) {
                         Toast.makeText(this, "An idol with this name already exists.", Toast.LENGTH_SHORT).show()
                     } else {

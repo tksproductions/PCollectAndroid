@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/photocardImageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -15,6 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:scaleType="centerCrop"
-        android:foreground="?attr/selectableItemBackground" />
+        android:foreground="?attr/selectableItemBackground"
+        app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

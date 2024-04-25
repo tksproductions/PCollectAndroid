@@ -23,7 +23,7 @@ class PhotocardAdapter(private val photocardList: MutableList<Photocard>, privat
 
             when {
                 photocard.isCollected -> {
-                    photocardImageView.alpha = 0.4f
+                    photocardImageView.alpha = 0.5f
                     photocardBorder.setBackgroundResource(R.drawable.photocard_border_collected)
                 }
                 photocard.isWishlisted -> {

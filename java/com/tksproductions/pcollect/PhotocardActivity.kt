@@ -86,15 +86,15 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
 
     private fun showAddPhotocardOptions() {
         val options = arrayOf("Import from Gallery", "Add from Catalog")
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Add Photocard")
+        val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
         builder.setItems(options) { dialog, which ->
             when (which) {
                 0 -> importPhotocardFromGallery()
                 1 -> openPhotocardCatalog()
             }
         }
-        builder.show()
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun importPhotocardFromGallery() {
@@ -163,8 +163,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
 
     private fun showCategorizeOptions() {
         val options = arrayOf("Collected", "Wishlisted", "Default", "Delete")
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Categorize Photocards")
+        val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
         builder.setItems(options) { dialog, which ->
             when (which) {
                 0 -> categorizePhotocards(true, false)
