@@ -23,7 +23,7 @@ class PhotocardAdapter(private val photocardList: MutableList<Photocard>, privat
 
             when {
                 photocard.isCollected -> {
-                    photocardImageView.alpha = 0.6f
+                    photocardImageView.alpha = 0.4f
                     photocardBorder.setBackgroundResource(R.drawable.photocard_border_collected)
                 }
                 photocard.isWishlisted -> {
@@ -37,7 +37,9 @@ class PhotocardAdapter(private val photocardList: MutableList<Photocard>, privat
             }
 
             if (isSelected) {
-                photocardImageView.alpha = 0.8f
+                photocardImageView.setColorFilter(Color.parseColor("#80FF2E98"))
+            } else {
+                photocardImageView.clearColorFilter()
             }
         }
     }

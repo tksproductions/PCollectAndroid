@@ -71,6 +71,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
             val savedPhotocardList = gson.fromJson<List<Photocard>>(photocardListJson, type)
             photocardList.clear()
             photocardList.addAll(savedPhotocardList)
+            sortPhotocards()
             photocardAdapter.notifyDataSetChanged()
         }
     }
@@ -121,6 +122,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
                         photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                        sortPhotocards()
                         savePhotocards()
                         photocardAdapter.notifyDataSetChanged()
                     }
@@ -131,6 +133,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                         val photocardUri = Uri.parse("file:///android_asset/Photocards/$idolName/$photocardName")
                         photocardList.add(Photocard(photocardUri, false, false, photocardName))
                     }
+                    sortPhotocards()
                     savePhotocards()
                     photocardAdapter.notifyDataSetChanged()
                 }
@@ -159,7 +162,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun showCategorizeOptions() {
-        val options = arrayOf("Collected", "Wishlisted", "Normal")
+        val options = arrayOf("Collected", "Wishlisted", "Normal", "Delete")
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Categorize Photocards")
         builder.setItems(options) { dialog, which ->
@@ -167,6 +170,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                 0 -> categorizePhotocards(true, false)
                 1 -> categorizePhotocards(false, true)
                 2 -> categorizePhotocards(false, false)
+                3 -> deleteSelectedPhotocards()
             }
             selectedPhotocards.clear()
             savePhotocards()
@@ -180,7 +184,22 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
             photocardList[position].isCollected = isCollected
             photocardList[position].isWishlisted = isWishlisted
         }
+        sortPhotocards()
         photocardAdapter.notifyDataSetChanged()
+    }
+
+    private fun deleteSelectedPhotocards() {
+        val deletePositions = selectedPhotocards.sorted().reversed()
+        deletePositions.forEach { position ->
+            photocardList.removeAt(position)
+        }
+        photocardAdapter.notifyDataSetChanged()
+    }
+
+    private fun sortPhotocards() {
+        photocardList.sortWith(compareBy<Photocard> { it.isCollected }
+            .thenByDescending { it.isWishlisted }
+            .thenBy { !it.isWishlisted && !it.isCollected })
     }
 
     companion object {

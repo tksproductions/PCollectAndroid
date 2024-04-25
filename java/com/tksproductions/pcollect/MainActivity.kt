@@ -19,6 +19,7 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityMainBinding
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val dexOutputDir: File = codeCacheDir
+        dexOutputDir.setReadOnly()
 
         idolAdapter = IdolAdapter(idolList)
         binding.recyclerView.apply {
