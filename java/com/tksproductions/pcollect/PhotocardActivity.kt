@@ -59,6 +59,9 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         directory.listFiles()?.filter { it.isFile && it.name.endsWith(".jpg") }?.forEach { file ->
             photocardList.add(Photocard(Uri.fromFile(file), false, false, file.name))
         }
+
+        photocardList.sortWith(compareBy<Photocard> { it.isWishlisted }.thenBy { it.isCollected }.thenBy { it.name })
+
         photocardAdapter.notifyDataSetChanged()
     }
 
