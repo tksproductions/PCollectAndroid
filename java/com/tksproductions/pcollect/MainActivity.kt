@@ -81,12 +81,17 @@ class MainActivity : AppCompatActivity() {
             addButton.setOnClickListener {
                 val idolName = idolNameEditText.text.toString()
                 if (idolName.isNotEmpty() && selectedImageUri != null) {
-                    val newIdol = Idol(idolName, selectedImageUri!!)
-                    idolList.add(newIdol)
-                    saveIdols()
-                    idolAdapter.notifyItemInserted(idolList.size - 1)
-                    selectedImageUri = null
-                    alertDialog.dismiss()
+                    // Check if the idol name already exists
+                    if (idolList.any { it.name == idolName }) {
+                        Toast.makeText(this, "An idol with this name already exists.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val newIdol = Idol(idolName, selectedImageUri!!)
+                        idolList.add(newIdol)
+                        saveIdols()
+                        idolAdapter.notifyItemInserted(idolList.size - 1)
+                        selectedImageUri = null
+                        alertDialog.dismiss()
+                    }
                 } else {
                     Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
                 }

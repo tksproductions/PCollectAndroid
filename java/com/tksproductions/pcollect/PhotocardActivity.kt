@@ -162,7 +162,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun showCategorizeOptions() {
-        val options = arrayOf("Collected", "Wishlisted", "Normal", "Delete")
+        val options = arrayOf("Collected", "Wishlisted", "Default", "Delete")
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Categorize Photocards")
         builder.setItems(options) { dialog, which ->
