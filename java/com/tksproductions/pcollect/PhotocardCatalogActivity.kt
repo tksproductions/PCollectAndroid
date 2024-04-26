@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
+import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +17,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPhotocardCatalogBinding
     private lateinit var photocardCatalogAdapter: PhotocardCatalogAdapter
-    private val photocardList = mutableListOf<String>()
+    private val photocardList = mutableListOf<Pair<String, String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +26,25 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
-        val idolName = intent.getStringExtra("idolName") ?: return
-        loadPhotocards(idolName)
+        val initialSearchName = intent.getStringExtra("idolName") ?: ""
+        binding.searchView.setQuery(initialSearchName, false)
+        performSearch(initialSearchName)
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    performSearch(it)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    performSearch(it)
+                }
+                return true
+            }
+        })
 
         binding.addSelectedButton.setOnClickListener {
             val selectedPhotocards = photocardCatalogAdapter.getSelectedPhotocards()
@@ -53,15 +69,38 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadPhotocards(idolName: String) {
+    private fun sanitizeSearchName(searchName: String): String {
+        return searchName.replace("\\s".toRegex(), "").replace("[^a-zA-Z0-9]".toRegex(), "").lowercase()
+    }
+
+    private fun performSearch(searchName: String) {
+        val sanitizedSearchName = sanitizeSearchName(searchName)
+        loadPhotocards(sanitizedSearchName)
+    }
+
+    private fun loadPhotocards(sanitizedSearchName: String) {
+        photocardList.clear()
+
         val assetManager = assets
-        val photocardFiles = assetManager.list("Photocards/$idolName") ?: return
-        photocardList.addAll(photocardFiles)
+        val idolFolders = assetManager.list("Photocards") ?: return
+
+        val matchingIdolFolders = idolFolders.filter { idolFolder ->
+            val sanitizedIdolName = sanitizeSearchName(idolFolder)
+            sanitizedIdolName == sanitizedSearchName || sanitizedIdolName.startsWith(sanitizedSearchName)
+        }
+
+        for (idolFolder in matchingIdolFolders) {
+            val photocardFiles = assetManager.list("Photocards/$idolFolder") ?: continue
+            for (photocardFile in photocardFiles) {
+                photocardList.add(Pair(idolFolder, photocardFile))
+            }
+        }
+
         photocardCatalogAdapter.notifyDataSetChanged()
     }
 
     inner class PhotocardCatalogAdapter(
-        private val photocardList: List<String>,
+        private val photocardList: List<Pair<String, String>>,
         private val onItemClick: (String, Boolean) -> Unit
     ) : RecyclerView.Adapter<PhotocardCatalogAdapter.ViewHolder>() {
 
@@ -74,9 +113,10 @@ class PhotocardCatalogActivity : AppCompatActivity() {
                 photocardImageView.setOnClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
-                        val photocardName = photocardList[position]
-                        val isSelected = selectedPhotocards.contains(photocardName)
-                        onItemClick(photocardName, !isSelected)
+                        val (idolFolder, photocardName) = photocardList[position]
+                        val photocard = "$idolFolder/$photocardName"
+                        val isSelected = selectedPhotocards.contains(photocard)
+                        onItemClick(photocard, !isSelected)
                     }
                 }
             }
@@ -89,14 +129,14 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val photocardName = photocardList[position]
-            val idolName = intent.getStringExtra("idolName") ?: return
-            val photocardUri = "file:///android_asset/Photocards/$idolName/$photocardName"
+            val (idolFolder, photocardName) = photocardList[position]
+            val photocardUri = "file:///android_asset/Photocards/$idolFolder/$photocardName"
             Glide.with(holder.itemView)
                 .load(photocardUri)
                 .into(holder.photocardImageView)
 
-            val isSelected = selectedPhotocards.contains(photocardName)
+            val photocard = "$idolFolder/$photocardName"
+            val isSelected = selectedPhotocards.contains(photocard)
             holder.photocardImageView.alpha = if (isSelected) 0.5f else 1.0f
         }
 
