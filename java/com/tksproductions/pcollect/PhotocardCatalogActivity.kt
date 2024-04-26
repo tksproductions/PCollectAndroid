@@ -56,10 +56,15 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 
         binding.addSelectedButton.setOnClickListener {
             val selectedPhotocards = photocardCatalogAdapter.getSelectedPhotocards()
-            val intent = Intent()
-            intent.putStringArrayListExtra("selectedPhotocards", ArrayList(selectedPhotocards))
-            setResult(RESULT_OK, intent)
-            finish()
+            if (selectedPhotocards.isEmpty()) {
+                photocardCatalogAdapter.selectAllPhotocards()
+                binding.addSelectedButton.text = "Add Selected"
+            } else {
+                val intent = Intent()
+                intent.putStringArrayListExtra("selectedPhotocards", ArrayList(selectedPhotocards))
+                setResult(RESULT_OK, intent)
+                finish()
+            }
         }
 
         requestIdolTextView.setOnClickListener {
@@ -174,6 +179,11 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             val photocard = "$idolFolder/$photocardName"
             val isSelected = selectedPhotocards.contains(photocard)
             holder.photocardImageView.alpha = if (isSelected) 0.5f else 1.0f
+            if (selectedPhotocards.isEmpty()) {
+                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text = "Select All"
+            } else {
+                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text = "Add Selected"
+            }
         }
 
         override fun getItemCount(): Int {
@@ -192,6 +202,14 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 
         fun getSelectedPhotocards(): Set<String> {
             return selectedPhotocards
+        }
+        fun selectAllPhotocards() {
+            selectedPhotocards.clear()
+            for ((idolFolder, photocardName) in photocardList) {
+                val photocard = "$idolFolder/$photocardName"
+                selectedPhotocards.add(photocard)
+            }
+            notifyDataSetChanged()
         }
     }
 }

@@ -41,7 +41,6 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
             Log.i("OpenCV", "OpenCV successfully loaded.")
         } else {
             Log.e("OpenCV", "Failed to load OpenCV.")
-            // Handle the failure case, e.g., show an error message or exit the app
         }
 
         setupRecyclerView()
