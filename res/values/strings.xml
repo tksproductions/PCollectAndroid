@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PCollect</string>
+    <string name="add_idol_photocards">Add %s Photocards</string>
 </resources>

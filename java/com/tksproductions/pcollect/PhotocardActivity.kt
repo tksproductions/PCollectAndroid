@@ -49,6 +49,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         setupCategorizeButton()
 
         idolName = intent.getStringExtra("idolName") ?: return
+        binding.addPhotocardButton.text = getString(R.string.add_idol_photocards, idolName)
         loadPhotocards()
     }
 
