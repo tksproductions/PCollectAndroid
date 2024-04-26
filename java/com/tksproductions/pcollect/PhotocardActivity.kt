@@ -151,7 +151,8 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                 REQUEST_PHOTOCARD_PICK -> {
                     val selectedPhotocards = data.getStringArrayListExtra("selectedPhotocards") ?: return
                     selectedPhotocards.forEach { photocardName ->
-                        val photocardUri = Uri.parse("file:///android_asset/Photocards/$idolName/$photocardName")
+                        val photocardUri = Uri.parse("file:///android_asset/Photocards/$photocardName")
+                        println(photocardUri)
                         photocardList.add(Photocard(photocardUri, false, false, photocardName))
                     }
                     sortPhotocards()
