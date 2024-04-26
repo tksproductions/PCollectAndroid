@@ -53,31 +53,20 @@ class MainActivity : AppCompatActivity() {
         loadIdols()
     }
 
+    private lateinit var alertDialog: AlertDialog
+
     private fun showAddIdolDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_idol, null)
         val idolNameEditText = dialogView.findViewById<EditText>(R.id.idolNameEditText)
         val idolImageView = dialogView.findViewById<ImageView>(R.id.idolImageView)
         val selectImageTextView = dialogView.findViewById<TextView>(R.id.selectImageTextView)
 
-        val alertDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
+        selectImageTextView.visibility = View.VISIBLE
+        idolImageView.setImageDrawable(null)
+
+        alertDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
             .setView(dialogView)
-            .setPositiveButton("Add", null)
-            .setNegativeButton("Cancel") { _, _ ->
-                selectedImageUri = null
-            }
-            .create()
-
-        alertDialog.setOnShowListener {
-            addButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            addButton.isEnabled = false
-
-            selectImageTextView.visibility = View.VISIBLE
-
-            idolImageView.setOnClickListener {
-                openImagePicker()
-            }
-
-            addButton.setOnClickListener {
+            .setPositiveButton("Add") { _, _ ->
                 val idolName = idolNameEditText.text.toString()
                 if (idolName.isNotEmpty() && selectedImageUri != null) {
                     if (idolList.any { it.name == idolName }) {
@@ -88,12 +77,18 @@ class MainActivity : AppCompatActivity() {
                         saveIdols()
                         idolAdapter.notifyItemInserted(idolList.size - 1)
                         selectedImageUri = null
-                        alertDialog.dismiss()
                     }
                 } else {
                     Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
                 }
             }
+            .setNegativeButton("Cancel") { _, _ ->
+                selectedImageUri = null
+            }
+            .create()
+
+        idolImageView.setOnClickListener {
+            openImagePicker()
         }
 
         alertDialog.show()
@@ -111,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
             selectedImageUri = data.data
 
-            val dialogView = layoutInflater.inflate(R.layout.dialog_add_idol, null)
+            val dialogView = alertDialog.findViewById<View>(android.R.id.content)
             val idolImageView = dialogView.findViewById<ImageView>(R.id.idolImageView)
             val selectImageTextView = dialogView.findViewById<TextView>(R.id.selectImageTextView)
 
@@ -124,8 +119,6 @@ class MainActivity : AppCompatActivity() {
 
             idolImageView.setImageURI(selectedImageUri)
             selectImageTextView.visibility = View.GONE
-
-            addButton.isEnabled = true
         }
     }
 

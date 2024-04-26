@@ -10,7 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter idol name"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        android:backgroundTint="@android:color/white"/>
 
     <FrameLayout
         android:id="@+id/idolImageContainer"
@@ -32,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Select Image"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="18sp" />
 
     </FrameLayout>
