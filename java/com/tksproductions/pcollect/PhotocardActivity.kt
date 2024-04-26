@@ -2,8 +2,11 @@ package com.tksproductions.pcollect
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +17,9 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityPhotocardBinding
+import org.opencv.android.OpenCVLoader
+import java.io.File
+import java.io.FileOutputStream
 
 class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClickListener {
 
@@ -30,6 +36,13 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         super.onCreate(savedInstanceState)
         binding = ActivityPhotocardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (OpenCVLoader.initDebug()) {
+            Log.i("OpenCV", "OpenCV successfully loaded.")
+        } else {
+            Log.e("OpenCV", "Failed to load OpenCV.")
+            // Handle the failure case, e.g., show an error message or exit the app
+        }
 
         setupRecyclerView()
         setupAddPhotocardButton()
@@ -85,12 +98,13 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun showAddPhotocardOptions() {
-        val options = arrayOf("Import from Gallery", "Add from Catalog")
+        val options = arrayOf("Add from Catalog", "Import from Gallery", "Extract from Template")
         val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
         builder.setItems(options) { dialog, which ->
             when (which) {
-                0 -> importPhotocardFromGallery()
-                1 -> openPhotocardCatalog()
+                0 -> openPhotocardCatalog()
+                1 -> importPhotocardFromGallery()
+                2 -> extractPhotocardsFromTemplate()
             }
         }
         val dialog = builder.create()
@@ -108,6 +122,13 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         val intent = Intent(this, PhotocardCatalogActivity::class.java)
         intent.putExtra("idolName", idolName)
         startActivityForResult(intent, REQUEST_PHOTOCARD_PICK)
+    }
+
+    private fun extractPhotocardsFromTemplate() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.type = "image/*"
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        startActivityForResult(intent, REQUEST_TEMPLATE_IMPORT)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,8 +158,47 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                     savePhotocards()
                     photocardAdapter.notifyDataSetChanged()
                 }
+                REQUEST_TEMPLATE_IMPORT -> {
+                    val selectedImageUri = data.data
+                    if (selectedImageUri != null) {
+                        val contentResolver = applicationContext.contentResolver
+                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
+                        extractPhotocardsFromUri(selectedImageUri)
+                    }
+                }
             }
         }
+    }
+
+    private fun extractPhotocardsFromUri(uri: Uri) {
+        val inputBitmap = uriToBitmap(uri)
+        if (inputBitmap != null) {
+            val extractedBitmaps = OpenCVUtils.extractPhotos(inputBitmap)
+            extractedBitmaps.forEach { (bitmap, rect) ->
+                val photocardUri = saveBitmapToFile(bitmap)
+                photocardList.add(Photocard(photocardUri, false, false, "Extracted Photocard"))
+            }
+            sortPhotocards()
+            savePhotocards()
+            photocardAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun uriToBitmap(uri: Uri): Bitmap? {
+        val contentResolver = applicationContext.contentResolver
+        val inputStream = contentResolver.openInputStream(uri)
+        return BitmapFactory.decodeStream(inputStream)
+    }
+
+    private fun saveBitmapToFile(bitmap: Bitmap): Uri {
+        val file = File(applicationContext.filesDir, "extracted_photocard_${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+        return Uri.fromFile(file)
     }
 
     override fun onPhotocardClick(position: Int) {
@@ -204,5 +264,6 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     companion object {
         private const val REQUEST_PHOTOCARD_IMPORT = 1
         private const val REQUEST_PHOTOCARD_PICK = 2
+        private const val REQUEST_TEMPLATE_IMPORT = 3
     }
 }
