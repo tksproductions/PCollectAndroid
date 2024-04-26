@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveIdols() {
+    fun saveIdols() {
         val sharedPreferences = getSharedPreferences("IdolPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val idolListJson = gson.toJson(idolList)

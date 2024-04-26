@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import android.app.AlertDialog
+import android.content.Context
 
 class IdolAdapter(private val idolList: MutableList<Idol>) : RecyclerView.Adapter<IdolAdapter.IdolViewHolder>() {
 
@@ -32,6 +34,26 @@ class IdolAdapter(private val idolList: MutableList<Idol>) : RecyclerView.Adapte
                 intent.putExtra("idolName", idolList[adapterPosition].name)
                 it.context.startActivity(intent)
             }
+            itemView.setOnLongClickListener {
+                showDeleteConfirmationDialog(adapterPosition)
+                true
+            }
+        }
+        private fun showDeleteConfirmationDialog(position: Int) {
+            val context = itemView.context
+            AlertDialog.Builder(context, R.style.DarkDialogTheme)
+                .setMessage("Are you sure you want to delete this idol?")
+                .setPositiveButton("Delete") { _, _ ->
+                    deleteIdol(position)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        private fun deleteIdol(position: Int) {
+            idolList.removeAt(position)
+            notifyItemRemoved(position)
+            (itemView.context as? MainActivity)?.saveIdols()
         }
 
         fun bind(idol: Idol) {

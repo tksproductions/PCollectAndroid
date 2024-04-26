@@ -76,7 +76,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         }
     }
 
-    private fun savePhotocards() {
+    fun savePhotocards() {
         val sharedPreferences = getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val photocardListJson = gson.toJson(photocardList)
