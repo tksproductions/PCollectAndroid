@@ -1,13 +1,16 @@
 package com.tksproductions.pcollect
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -18,6 +21,8 @@ class PhotocardCatalogActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPhotocardCatalogBinding
     private lateinit var photocardCatalogAdapter: PhotocardCatalogAdapter
     private val photocardList = mutableListOf<Pair<String, String>>()
+    private lateinit var noResultsLayout: ConstraintLayout
+    private lateinit var requestIdolTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +30,9 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView()
+
+        noResultsLayout = findViewById(R.id.noResultsLayout)
+        requestIdolTextView = findViewById(R.id.requestIdolTextView)
 
         val initialSearchName = intent.getStringExtra("idolName") ?: ""
         binding.searchView.setQuery(initialSearchName, false)
@@ -52,6 +60,11 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             intent.putStringArrayListExtra("selectedPhotocards", ArrayList(selectedPhotocards))
             setResult(RESULT_OK, intent)
             finish()
+        }
+
+        requestIdolTextView.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://pcollect.app"))
+            startActivity(intent)
         }
     }
 
@@ -81,12 +94,24 @@ class PhotocardCatalogActivity : AppCompatActivity() {
     private fun loadPhotocards(sanitizedSearchName: String) {
         photocardList.clear()
 
+        if (sanitizedSearchName.isEmpty()) {
+            showNoResults(false)
+            photocardCatalogAdapter.notifyDataSetChanged()
+            return
+        }
+
         val assetManager = assets
         val idolFolders = assetManager.list("Photocards") ?: return
 
         val matchingIdolFolders = idolFolders.filter { idolFolder ->
             val sanitizedIdolName = sanitizeSearchName(idolFolder)
             sanitizedIdolName == sanitizedSearchName || sanitizedIdolName.startsWith(sanitizedSearchName)
+        }
+
+        if (matchingIdolFolders.isEmpty()) {
+            showNoResults(true)
+            photocardCatalogAdapter.notifyDataSetChanged()
+            return
         }
 
         for (idolFolder in matchingIdolFolders) {
@@ -96,7 +121,18 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             }
         }
 
+        showNoResults(false)
         photocardCatalogAdapter.notifyDataSetChanged()
+    }
+
+    private fun showNoResults(show: Boolean) {
+        if (show) {
+            binding.recyclerView.visibility = View.GONE
+            noResultsLayout.visibility = View.VISIBLE
+        } else {
+            binding.recyclerView.visibility = View.VISIBLE
+            noResultsLayout.visibility = View.GONE
+        }
     }
 
     inner class PhotocardCatalogAdapter(
