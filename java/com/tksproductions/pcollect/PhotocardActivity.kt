@@ -87,6 +87,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
             sortPhotocards()
             photocardAdapter.notifyDataSetChanged()
         }
+        binding.textNoPhotocards.visibility = if (photocardList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     fun savePhotocards() {
@@ -146,6 +147,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                         sortPhotocards()
                         savePhotocards()
                         photocardAdapter.notifyDataSetChanged()
+                        binding.textNoPhotocards.visibility = View.GONE
                     }
                 }
                 REQUEST_PHOTOCARD_PICK -> {
@@ -158,6 +160,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                     sortPhotocards()
                     savePhotocards()
                     photocardAdapter.notifyDataSetChanged()
+                    binding.textNoPhotocards.visibility = View.GONE
                 }
                 REQUEST_TEMPLATE_IMPORT -> {
                     val selectedImageUri = data.data
@@ -167,6 +170,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
                         extractPhotocardsFromUri(selectedImageUri)
+                        binding.textNoPhotocards.visibility = View.GONE
                     }
                 }
             }

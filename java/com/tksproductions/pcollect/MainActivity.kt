@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                         saveIdols()
                         idolAdapter.notifyItemInserted(idolList.size - 1)
                         selectedImageUri = null
+                        binding.textWelcome.visibility = View.GONE
                     }
                 } else {
                     Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
@@ -132,6 +133,7 @@ class MainActivity : AppCompatActivity() {
             idolList.addAll(savedIdolList)
             idolAdapter.notifyDataSetChanged()
         }
+        binding.textWelcome.visibility = if (idolList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     fun saveIdols() {
