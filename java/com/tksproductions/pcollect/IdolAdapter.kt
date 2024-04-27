@@ -51,9 +51,18 @@ class IdolAdapter(private val idolList: MutableList<Idol>) : RecyclerView.Adapte
         }
 
         private fun deleteIdol(position: Int) {
+            val idolName = idolList[position].name
+            deletePhotocards(idolName)
             idolList.removeAt(position)
             notifyItemRemoved(position)
             (itemView.context as? MainActivity)?.saveIdols()
+        }
+
+        private fun deletePhotocards(idolName: String) {
+            val sharedPreferences = itemView.context.getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.remove("${idolName}_photocardList")
+            editor.apply()
         }
 
         fun bind(idol: Idol) {
