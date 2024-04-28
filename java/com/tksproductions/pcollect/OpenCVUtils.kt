@@ -9,6 +9,7 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 object OpenCVUtils {
+
     fun extractPhotos(inputBitmap: Bitmap, aspectRatio: Pair<Float, Float> = Pair(5.5f, 8.5f), minPercentage: Float = 0.1f): List<Pair<Bitmap, Rect>> {
         val inputMat = bitmapToMat(inputBitmap)
         val extractedPairs = extractPhotos(inputMat, aspectRatio, minPercentage)
@@ -20,13 +21,12 @@ object OpenCVUtils {
         }
 
         inputMat.release()
-
         return extractedBitmaps
     }
 
-    private fun extractPhotos(inputImage: Mat, aspectRatio: Pair<Float, Float> = Pair(5.5f, 8.5f), minPercentage: Float = 0.1f): List<Pair<Mat, Rect>> {
+    private fun extractPhotos(inputMat: Mat, aspectRatio: Pair<Float, Float> = Pair(5.5f, 8.5f), minPercentage: Float = 0.1f): List<Pair<Mat, Rect>> {
         val gray = Mat()
-        Imgproc.cvtColor(inputImage, gray, Imgproc.COLOR_BGR2GRAY)
+        Imgproc.cvtColor(inputMat, gray, Imgproc.COLOR_BGR2GRAY)
 
         val adaptiveThresholded = Mat()
         Imgproc.adaptiveThreshold(gray, adaptiveThresholded, 255.0, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 2.0)
@@ -40,18 +40,20 @@ object OpenCVUtils {
         Imgproc.findContours(morphed, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE)
 
         val extractedPhotos = mutableListOf<Pair<Mat, Rect>>()
-        val totalPixels = inputImage.cols() * inputImage.rows()
+        val totalPixels = inputMat.cols() * inputMat.rows()
         val minSize = sqrt((minPercentage / 100.0 * totalPixels).toDouble()).toInt()
+
         val sizeGroups = mutableMapOf<Int, MutableList<Rect>>()
 
         for (cnt in contours) {
             val rect = Imgproc.boundingRect(cnt)
             val currentAspectRatio = rect.width.toFloat() / rect.height.toFloat()
+
             if (aspectRatio.first / aspectRatio.second * 0.8f <= currentAspectRatio &&
                 currentAspectRatio <= aspectRatio.first / aspectRatio.second * 1.2f) {
                 val area = rect.width * rect.height
                 if (rect.width >= minSize && rect.height >= minSize) {
-                    sizeGroups.getOrPut(area) { mutableListOf() }.add(rect)
+                    sizeGroups.getOrPut(area) { mutableListOf<Rect>() }.add(rect)
                 }
             }
         }
@@ -64,10 +66,11 @@ object OpenCVUtils {
                 val rect = Imgproc.boundingRect(cnt)
                 val currentAspectRatio = rect.width.toFloat() / rect.height.toFloat()
                 val area = rect.width * rect.height
+
                 if (aspectRatio.first / aspectRatio.second * 0.8f <= currentAspectRatio &&
                     currentAspectRatio <= aspectRatio.first / aspectRatio.second * 1.2f &&
                     abs(area - mostCommonSize) < toleranceValue) {
-                    val photo = Mat(inputImage, rect)
+                    val photo = Mat(inputMat, rect)
                     extractedPhotos.add(Pair(photo, rect))
                 }
             }
