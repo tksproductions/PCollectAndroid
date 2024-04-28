@@ -13,6 +13,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.reflect.TypeToken
@@ -40,11 +42,34 @@ class MainActivity : AppCompatActivity() {
         val dexOutputDir: File = codeCacheDir
         dexOutputDir.setReadOnly()
 
-        idolAdapter = IdolAdapter(idolList)
+        idolAdapter = IdolAdapter(idolList) { fromPosition, toPosition ->
+            onIdolSwapped(fromPosition, toPosition)
+        }
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@MainActivity, 2)
             adapter = idolAdapter
         }
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+            0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                idolAdapter.onItemMove(fromPosition, toPosition)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // Not used
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
 
         binding.btnAddIdol.setOnClickListener {
             showAddIdolDialog()
@@ -134,6 +159,10 @@ class MainActivity : AppCompatActivity() {
             idolAdapter.notifyDataSetChanged()
         }
         binding.textWelcome.visibility = if (idolList.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun onIdolSwapped(fromPosition: Int, toPosition: Int) {
+        saveIdols()
     }
 
     fun saveIdols() {
