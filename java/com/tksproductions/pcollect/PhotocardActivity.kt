@@ -99,17 +99,32 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun showAddPhotocardOptions() {
-        val options = arrayOf("Add from Catalog", "Import from Gallery", "Extract from Template")
+        val options = arrayOf("Add from Catalog", "Import from Gallery", "Extract from Template", "Share Wishlist")
         val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
         builder.setItems(options) { dialog, which ->
             when (which) {
                 0 -> openPhotocardCatalog()
                 1 -> importPhotocardFromGallery()
                 2 -> extractPhotocardsFromTemplate()
+                3 -> shareWishlist()
             }
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun shareWishlist() {
+        val wishlistedPhotocards = photocardList.filter { it.isWishlisted }
+        if (wishlistedPhotocards.isNotEmpty()) {
+            val intent = Intent(this, WishlistGridActivity::class.java)
+            intent.putParcelableArrayListExtra("wishlistedPhotocards", ArrayList(wishlistedPhotocards))
+            startActivity(intent)
+        } else {
+            val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
+            builder.setMessage("You have no wishlisted photocards.")
+            builder.setPositiveButton("OK", null)
+            builder.show()
+        }
     }
 
     private fun importPhotocardFromGallery() {

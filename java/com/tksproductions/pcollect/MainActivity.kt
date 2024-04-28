@@ -22,6 +22,8 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityMainBinding
 import java.io.File
+import android.os.Parcel
+import android.os.Parcelable
 
 class MainActivity : AppCompatActivity() {
 
@@ -179,7 +181,40 @@ class MainActivity : AppCompatActivity() {
 }
 
 data class Idol(var name: String, var imageUri: Uri)
-data class Photocard(var imageUri: Uri, var isCollected: Boolean, var isWishlisted: Boolean, var name: String)
+data class Photocard(
+    val imageUri: Uri,
+    var isCollected: Boolean,
+    var isWishlisted: Boolean,
+    val name: String
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readParcelable<Uri>(Uri::class.java.classLoader)!!,
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readString()!!
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeParcelable(imageUri, flags)
+        parcel.writeByte(if (isCollected) 1 else 0)
+        parcel.writeByte(if (isWishlisted) 1 else 0)
+        parcel.writeString(name)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Photocard> {
+        override fun createFromParcel(parcel: Parcel): Photocard {
+            return Photocard(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Photocard?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 class UriTypeAdapter : TypeAdapter<Uri>() {
     override fun write(out: JsonWriter, value: Uri?) {
