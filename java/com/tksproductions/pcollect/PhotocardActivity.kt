@@ -113,9 +113,9 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun importPhotocardFromGallery() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "image/*"
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         startActivityForResult(intent, REQUEST_PHOTOCARD_IMPORT)
     }
 
@@ -137,18 +137,24 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         if (resultCode == RESULT_OK && data != null) {
             when (requestCode) {
                 REQUEST_PHOTOCARD_IMPORT -> {
-                    val selectedImageUri = data.data
-                    if (selectedImageUri != null) {
-                        val contentResolver = applicationContext.contentResolver
-                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
-                        photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
-                        sortPhotocards()
-                        savePhotocards()
-                        photocardAdapter.notifyDataSetChanged()
-                        binding.textNoPhotocards.visibility = View.GONE
+                    if (data.clipData != null) {
+                        val clipData = data.clipData
+                        for (i in 0 until clipData!!.itemCount) {
+                            val selectedImageUri = clipData.getItemAt(i).uri
+                            if (selectedImageUri != null) {
+                                photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                            }
+                        }
+                    } else if (data.data != null) {
+                        val selectedImageUri = data.data
+                        if (selectedImageUri != null) {
+                            photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                        }
                     }
+                    sortPhotocards()
+                    savePhotocards()
+                    photocardAdapter.notifyDataSetChanged()
+                    binding.textNoPhotocards.visibility = View.GONE
                 }
                 REQUEST_PHOTOCARD_PICK -> {
                     val selectedPhotocards = data.getStringArrayListExtra("selectedPhotocards") ?: return
