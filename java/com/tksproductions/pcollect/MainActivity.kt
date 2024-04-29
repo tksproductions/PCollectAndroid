@@ -25,6 +25,8 @@ import com.tksproductions.pcollect.databinding.ActivityMainBinding
 import java.io.File
 import android.os.Parcel
 import android.os.Parcelable
+import android.os.Handler
+import android.os.Looper
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private var deleteConfirmationDialog: AlertDialog? = null
     private var longPressedPosition: Int = -1
     private var isDragging = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val LONG_PRESS_DELAY = 1500L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,18 +68,24 @@ class MainActivity : AppCompatActivity() {
                                 val position = rv.getChildAdapterPosition(childView)
                                 if (position != RecyclerView.NO_POSITION) {
                                     longPressedPosition = position
-                                    showDeleteConfirmationDialog(position)
                                     isDragging = false
+                                    handler.postDelayed({
+                                        if (!isDragging) {
+                                            showDeleteConfirmationDialog(position)
+                                        }
+                                    }, LONG_PRESS_DELAY)
                                 }
                             }
                         }
                         MotionEvent.ACTION_MOVE -> {
                             if (!isDragging) {
                                 isDragging = true
+                                handler.removeCallbacksAndMessages(null)
                                 dismissDeleteConfirmationDialog()
                             }
                         }
                         MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            handler.removeCallbacksAndMessages(null)
                             longPressedPosition = -1
                         }
                     }

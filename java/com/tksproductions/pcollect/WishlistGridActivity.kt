@@ -48,20 +48,22 @@ class WishlistGridActivity : AppCompatActivity() {
         if (numImages <= 0) {
             return Triple(0, 0f, 0f)
         }
+        else if (numImages <= 1){
+            return Triple(2, screenWidth, screenWidth * 1.5f)
+        }
 
-        var bestLayout = Triple(1, screenWidth, screenWidth * 1.5f)  // Assuming aspect ratio for image is 2:3 like in Swift
+        var bestLayout = Triple(1, screenWidth, screenWidth * 1.5f)
         var maxArea = 0f
 
         for (columns in 1..numImages) {
             val imageWidth = screenWidth / columns
-            val imageHeight = imageWidth * 1.5f  // Change this to match your desired aspect ratio
+            val imageHeight = imageWidth * 1.5f
             val rows = ceil(numImages.toFloat() / columns).toInt()
             val totalHeight = imageHeight * rows
 
             if (totalHeight > frameHeight) {
-                // Handling overflow by adjusting the height to fit within the frame height
                 val adjustedImageHeight = frameHeight / rows * 0.95f
-                val adjustedImageWidth = adjustedImageHeight * (2f / 3f)  // Adjusted to match 2:3 aspect ratio
+                val adjustedImageWidth = adjustedImageHeight * (2f / 3f)
 
                 if (adjustedImageWidth * columns <= screenWidth) {
                     val area = adjustedImageWidth * adjustedImageHeight * numImages

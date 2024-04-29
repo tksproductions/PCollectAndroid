@@ -5,17 +5,35 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/photocardImageView"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/photocardContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="W,1:1.55"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:layout_constraintDimensionRatio="1:1.55"
         app:layout_constraintEnd_toEndOf="parent"
-        android:scaleType="centerCrop"
-        android:foreground="?attr/selectableItemBackground"
-        app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/photocardImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:foreground="?attr/selectableItemBackground"
+            app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
+
+    </androidx.cardview.widget.CardView>
+
+    <View
+        android:id="@+id/photocardBorder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/photocard_border_catalog"
+        app:layout_constraintBottom_toBottomOf="@id/photocardContainer"
+        app:layout_constraintEnd_toEndOf="@id/photocardContainer"
+        app:layout_constraintStart_toStartOf="@id/photocardContainer"
+        app:layout_constraintTop_toTopOf="@id/photocardContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
