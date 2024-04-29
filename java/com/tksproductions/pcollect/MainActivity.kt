@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -36,6 +37,10 @@ class MainActivity : AppCompatActivity() {
         .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
         .create()
 
+    private var deleteConfirmationDialog: AlertDialog? = null
+    private var longPressedPosition: Int = -1
+    private var isDragging = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -50,6 +55,33 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@MainActivity, 2)
             adapter = idolAdapter
+            addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                    when (e.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            val childView = rv.findChildViewUnder(e.x, e.y)
+                            if (childView != null) {
+                                val position = rv.getChildAdapterPosition(childView)
+                                if (position != RecyclerView.NO_POSITION) {
+                                    longPressedPosition = position
+                                    showDeleteConfirmationDialog(position)
+                                    isDragging = false
+                                }
+                            }
+                        }
+                        MotionEvent.ACTION_MOVE -> {
+                            if (!isDragging) {
+                                isDragging = true
+                                dismissDeleteConfirmationDialog()
+                            }
+                        }
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            longPressedPosition = -1
+                        }
+                    }
+                    return false
+                }
+            })
         }
 
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
@@ -172,6 +204,36 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPreferences.edit()
         val idolListJson = gson.toJson(idolList)
         editor.putString("idolList", idolListJson)
+        editor.apply()
+    }
+
+    private fun showDeleteConfirmationDialog(position: Int) {
+        deleteConfirmationDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
+            .setMessage("Are you sure you want to delete this idol?")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteIdol(position)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun dismissDeleteConfirmationDialog() {
+        deleteConfirmationDialog?.dismiss()
+        deleteConfirmationDialog = null
+    }
+
+    private fun deleteIdol(position: Int) {
+        val idolName = idolList[position].name
+        deletePhotocards(idolName)
+        idolList.removeAt(position)
+        idolAdapter.notifyItemRemoved(position)
+        saveIdols()
+    }
+
+    private fun deletePhotocards(idolName: String) {
+        val sharedPreferences = getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.remove("${idolName}_photocardList")
         editor.apply()
     }
 

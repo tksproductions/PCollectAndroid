@@ -34,6 +34,7 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
         private var longPressHandler = Handler(Looper.getMainLooper())
         private var longPressRunnable: Runnable? = null
         private var deleteConfirmationDialog: AlertDialog? = null
+        private var isDragging = false
 
         init {
             itemView.setOnClickListener {
@@ -47,19 +48,27 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    isDragging = false
                     longPressRunnable = Runnable {
-                        showDeleteConfirmationDialog(adapterPosition)
+                        if (!isDragging) {
+                            showDeleteConfirmationDialog(adapterPosition)
+                        }
                     }
                     longPressHandler.postDelayed(longPressRunnable!!, 500)
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    dismissDeleteConfirmationDialog()
+                    if (!isDragging) {
+                        isDragging = true
+                        longPressRunnable?.let {
+                            longPressHandler.removeCallbacks(it)
+                        }
+                        dismissDeleteConfirmationDialog()
+                    }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     longPressRunnable?.let {
                         longPressHandler.removeCallbacks(it)
                     }
-                    dismissDeleteConfirmationDialog()
                 }
             }
             return false
