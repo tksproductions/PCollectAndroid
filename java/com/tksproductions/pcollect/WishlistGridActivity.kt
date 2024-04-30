@@ -10,20 +10,41 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tksproductions.pcollect.databinding.ActivityWishlistGridBinding
 import kotlin.math.ceil
 import kotlin.math.max
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import android.net.Uri
+import com.google.gson.GsonBuilder
 
 class WishlistGridActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWishlistGridBinding
     private lateinit var wishlistAdapter: WishlistAdapter
     private val aspectRatio = 1.0f / 1.0f
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+        .create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWishlistGridBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val wishlistedPhotocards = intent.getParcelableArrayListExtra<Photocard>("wishlistedPhotocards")
-        if (wishlistedPhotocards != null) {
+        val idolName = intent.getStringExtra("idolName")
+        if (idolName != null) {
+            loadWishlistedPhotocards(idolName)
+        }
+    }
+
+    private fun loadWishlistedPhotocards(idolName: String) {
+        val sharedPreferences = getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+        val photocardListJson = sharedPreferences.getString("${idolName}_photocardList", null)
+        if (photocardListJson != null) {
+            val type = object : TypeToken<List<Photocard>>() {}.type
+            val photocardList = gson.fromJson<List<Photocard>>(photocardListJson, type)
+            val wishlistedPhotocards = photocardList.filter { photocard -> photocard.isWishlisted }
             setupRecyclerView(wishlistedPhotocards)
         }
     }
@@ -34,6 +55,15 @@ class WishlistGridActivity : AppCompatActivity() {
             layoutManager = GridLayoutManager(this@WishlistGridActivity, calculateNumColumns(photocards.size))
             adapter = wishlistAdapter
             addItemDecoration(GridSpacingItemDecoration(calculateSpacing(photocards.size).toInt()))
+        }
+
+        photocards.forEachIndexed { index, photocard ->
+            val imageView = binding.recyclerView.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<ImageView>(R.id.photocardImageView)
+            imageView?.let {
+                Glide.with(this@WishlistGridActivity)
+                    .load(photocard.imageUri)
+                    .into(it)
+            }
         }
     }
 

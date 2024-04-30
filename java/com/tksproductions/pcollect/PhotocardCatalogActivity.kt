@@ -108,9 +108,18 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         val assetManager = assets
         val idolFolders = assetManager.list("Photocards") ?: return
 
-        val matchingIdolFolders = idolFolders.filter { idolFolder ->
+        val exactMatchIdolFolder = idolFolders.find { idolFolder ->
             val sanitizedIdolName = sanitizeSearchName(idolFolder)
-            sanitizedIdolName == sanitizedSearchName || sanitizedIdolName.startsWith(sanitizedSearchName)
+            sanitizedIdolName == sanitizedSearchName
+        }
+
+        val matchingIdolFolders = if (exactMatchIdolFolder != null) {
+            listOf(exactMatchIdolFolder)
+        } else {
+            idolFolders.filter { idolFolder ->
+                val sanitizedIdolName = sanitizeSearchName(idolFolder)
+                sanitizedIdolName.startsWith(sanitizedSearchName)
+            }
         }
 
         if (matchingIdolFolders.isEmpty()) {

@@ -253,40 +253,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 data class Idol(var name: String, var imageUri: Uri)
-data class Photocard(
-    val imageUri: Uri,
-    var isCollected: Boolean,
-    var isWishlisted: Boolean,
-    val name: String
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readParcelable<Uri>(Uri::class.java.classLoader)!!,
-        parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte(),
-        parcel.readString()!!
-    )
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeParcelable(imageUri, flags)
-        parcel.writeByte(if (isCollected) 1 else 0)
-        parcel.writeByte(if (isWishlisted) 1 else 0)
-        parcel.writeString(name)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Photocard> {
-        override fun createFromParcel(parcel: Parcel): Photocard {
-            return Photocard(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Photocard?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+data class Photocard(val imageUri: Uri, var isCollected: Boolean, var isWishlisted: Boolean, val name: String)
 
 class UriTypeAdapter : TypeAdapter<Uri>() {
     override fun write(out: JsonWriter, value: Uri?) {

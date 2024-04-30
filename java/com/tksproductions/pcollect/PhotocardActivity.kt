@@ -117,7 +117,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         val wishlistedPhotocards = photocardList.filter { it.isWishlisted }
         if (wishlistedPhotocards.isNotEmpty()) {
             val intent = Intent(this, WishlistGridActivity::class.java)
-            intent.putParcelableArrayListExtra("wishlistedPhotocards", ArrayList(wishlistedPhotocards))
+            intent.putExtra("idolName", idolName)
             startActivity(intent)
         } else {
             val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
