@@ -1,4 +1,3 @@
-// WishlistGridActivity.kt
 package com.tksproductions.pcollect
 
 import android.graphics.Rect
@@ -50,25 +49,16 @@ class WishlistGridActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView(photocards: List<Photocard>) {
-        wishlistAdapter = WishlistAdapter(photocards)
-        binding.recyclerView.apply {
-            val screenWidth = resources.displayMetrics.widthPixels.toFloat()
-            val frameWidth = screenWidth * 0.95f
-            val frameHeight = frameWidth * aspectRatio
-            val (numColumns, imageWidth, imageHeight) = calculateGrid(frameWidth, frameHeight, photocards.size)
+        val screenWidth = resources.displayMetrics.widthPixels.toFloat()
+        val frameWidth = screenWidth * 0.95f
+        val frameHeight = frameWidth * aspectRatio
+        val (numColumns, imageWidth, imageHeight) = calculateGrid(frameWidth, frameHeight, photocards.size)
 
+        wishlistAdapter = WishlistAdapter(photocards, imageWidth, imageHeight)
+        binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@WishlistGridActivity, numColumns)
             adapter = wishlistAdapter
             addItemDecoration(GridSpacingItemDecoration(calculateSpacing(photocards.size).toInt()))
-        }
-
-        photocards.forEachIndexed { index, photocard ->
-            val imageView = binding.recyclerView.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<ImageView>(R.id.photocardImageView)
-            imageView?.let {
-                Glide.with(this@WishlistGridActivity)
-                    .load(photocard.imageUri)
-                    .into(it)
-            }
         }
     }
 
@@ -77,7 +67,7 @@ class WishlistGridActivity : AppCompatActivity() {
         var maxArea = 0f
 
         for (columns in 1..numImages) {
-            val imageWidth = screenWidth / columns
+            val imageWidth = screenWidth / columns * 0.95f
             val imageHeight = imageWidth * 1.5f
             val rows = ceil(numImages.toFloat() / columns).toInt()
             val totalHeight = imageHeight * rows
@@ -102,7 +92,7 @@ class WishlistGridActivity : AppCompatActivity() {
             }
         }
 
-        return Triple(bestLayout.first, bestLayout.second * (2f / 3f), bestLayout.third * (2f / 3f))
+        return Triple(bestLayout.first, bestLayout.second, bestLayout.third)
     }
 
     private fun calculateSpacing(photocardsCount: Int): Float {

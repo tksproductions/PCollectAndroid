@@ -8,7 +8,11 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class WishlistAdapter(private val photocards: List<Photocard>) : RecyclerView.Adapter<WishlistAdapter.WishlistViewHolder>() {
+class WishlistAdapter(
+    private val photocards: List<Photocard>,
+    private val photocardWidth: Float,
+    private val photocardHeight: Float
+) : RecyclerView.Adapter<WishlistAdapter.WishlistViewHolder>() {
 
     inner class WishlistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photocardImageView: ImageView = itemView.findViewById(R.id.photocardImageView)
@@ -25,6 +29,10 @@ class WishlistAdapter(private val photocards: List<Photocard>) : RecyclerView.Ad
         Glide.with(holder.itemView)
             .load(photocard.imageUri)
             .into(holder.photocardImageView)
+
+        holder.photocardCardView.layoutParams.width = photocardWidth.toInt()
+        holder.photocardCardView.layoutParams.height = photocardHeight.toInt()
+        holder.photocardCardView.requestLayout()
 
         holder.photocardImageView.post {
             val imageWidth = holder.photocardImageView.width
