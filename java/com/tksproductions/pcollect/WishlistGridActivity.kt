@@ -52,7 +52,12 @@ class WishlistGridActivity : AppCompatActivity() {
     private fun setupRecyclerView(photocards: List<Photocard>) {
         wishlistAdapter = WishlistAdapter(photocards)
         binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(this@WishlistGridActivity, calculateNumColumns(photocards.size))
+            val screenWidth = resources.displayMetrics.widthPixels.toFloat()
+            val frameWidth = screenWidth * 0.95f
+            val frameHeight = frameWidth * aspectRatio
+            val (numColumns, imageWidth, imageHeight) = calculateGrid(frameWidth, frameHeight, photocards.size)
+
+            layoutManager = GridLayoutManager(this@WishlistGridActivity, numColumns)
             adapter = wishlistAdapter
             addItemDecoration(GridSpacingItemDecoration(calculateSpacing(photocards.size).toInt()))
         }
@@ -67,21 +72,7 @@ class WishlistGridActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateNumColumns(photocardsCount: Int): Int {
-        val screenWidth = resources.displayMetrics.widthPixels
-        val frameWidth = (screenWidth * 0.95f).toInt()
-        val (numColumns, _, _) = calculateGrid(frameWidth.toFloat(), frameWidth.toFloat() * aspectRatio, photocardsCount)
-        return numColumns
-    }
-
     private fun calculateGrid(screenWidth: Float, frameHeight: Float, numImages: Int): Triple<Int, Float, Float> {
-        if (numImages <= 0) {
-            return Triple(0, 0f, 0f)
-        }
-        else if (numImages <= 1){
-            return Triple(2, screenWidth, screenWidth * 1.5f)
-        }
-
         var bestLayout = Triple(1, screenWidth, screenWidth * 1.5f)
         var maxArea = 0f
 
@@ -111,9 +102,8 @@ class WishlistGridActivity : AppCompatActivity() {
             }
         }
 
-        return bestLayout
+        return Triple(bestLayout.first, bestLayout.second * (2f / 3f), bestLayout.third * (2f / 3f))
     }
-
 
     private fun calculateSpacing(photocardsCount: Int): Float {
         val maxCardsForMaxSpacing = 4
@@ -130,7 +120,6 @@ class WishlistGridActivity : AppCompatActivity() {
             }
         }
     }
-
 }
 
 class GridSpacingItemDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {
