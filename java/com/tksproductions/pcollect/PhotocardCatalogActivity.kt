@@ -129,7 +129,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         }
 
         for (idolFolder in matchingIdolFolders) {
-            val photocardFiles = assetManager.list("Photocards/$idolFolder") ?: continue
+            val photocardFiles = assetManager.list("Photocards/$idolFolder")?.sortedWith(NaturalOrderComparator()) ?: continue
             for (photocardFile in photocardFiles) {
                 photocardList.add(Pair(idolFolder, photocardFile))
             }
@@ -138,6 +138,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         showNoResults(false)
         photocardCatalogAdapter.notifyDataSetChanged()
     }
+
 
     private fun showNoResults(show: Boolean) {
         if (show) {
@@ -220,5 +221,46 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             }
             notifyDataSetChanged()
         }
+    }
+}
+
+class NaturalOrderComparator : Comparator<String> {
+    private val numberPattern = Regex("\\d+")
+
+    override fun compare(o1: String?, o2: String?): Int {
+        if (o1 == null || o2 == null) {
+            return if (o1 == null) -1 else 1
+        }
+
+        val split1 = numberPattern.split(o1, 0)
+        val split2 = numberPattern.split(o2, 0)
+        val size = Math.min(split1.size, split2.size)
+
+        for (i in 0 until size) {
+            // Compare parts before each number
+            val cmp = split1[i].compareTo(split2[i])
+            if (cmp != 0) return cmp
+        }
+
+        if (split1.size != split2.size) {
+            // Strings are like "abc1" and "abc", and "abc" should come first
+            return split1.size - split2.size
+        }
+
+        // If non-digit parts are equal, compare numbers
+        val matcher1 = numberPattern.find(o1)
+        val matcher2 = numberPattern.find(o2)
+        while (matcher1 != null && matcher2 != null) {
+            val num1 = matcher1.value.toBigInteger()
+            val num2 = matcher2.value.toBigInteger()
+            val numberCompare = num1.compareTo(num2)
+            if (numberCompare != 0) return numberCompare
+
+            if (matcher1.next() == null || matcher2.next() == null) {
+                return if (matcher1.next() != null) 1 else -1
+            }
+        }
+
+        return 0
     }
 }

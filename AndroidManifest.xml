@@ -22,5 +22,6 @@
         </activity>
         <activity android:name=".PhotocardActivity" />
         <activity android:name=".PhotocardCatalogActivity" />
+        <activity android:name=".WishlistGridActivity" />
     </application>
 </manifest>
