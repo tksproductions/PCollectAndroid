@@ -123,6 +123,36 @@ public class Net {
 
 
     //
+    // C++:  void cv::dnn::Net::dumpToPbtxt(String path)
+    //
+
+    /**
+     * Dump net structure, hyperparameters, backend, target and fusion to pbtxt file
+     * @param path   path to output file with .pbtxt extension
+     *
+     * Use Netron (https://netron.app) to open the target file to visualize the model.
+     * Call method after setInput(). To see correct backend, target and fusion run after forward().
+     */
+    public void dumpToPbtxt(String path) {
+        dumpToPbtxt_0(nativeObj, path);
+    }
+
+
+    //
+    // C++:  int cv::dnn::Net::addLayer(String name, String type, int dtype, LayerParams params)
+    //
+
+    // Unknown type 'LayerParams' (I), skipping the function
+
+
+    //
+    // C++:  int cv::dnn::Net::addLayerToPrev(String name, String type, int dtype, LayerParams params)
+    //
+
+    // Unknown type 'LayerParams' (I), skipping the function
+
+
+    //
     // C++:  int cv::dnn::Net::getLayerId(String layer)
     //
 
@@ -211,6 +241,26 @@ public class Net {
      */
     public void connect(String outPin, String inpPin) {
         connect_0(nativeObj, outPin, inpPin);
+    }
+
+
+    //
+    // C++:  int cv::dnn::Net::registerOutput(string outputName, int layerId, int outputPort)
+    //
+
+    /**
+     * Registers network output with name
+     *
+     * Function may create additional 'Identity' layer.
+     *
+     * @param outputName identifier of the output
+     * @param layerId identifier of the second layer
+     * @param outputPort number of the second layer input
+     *
+     * @return index of bound layer (the same as layerId or newly created)
+     */
+    public int registerOutput(String outputName, int layerId, int outputPort) {
+        return registerOutput_0(nativeObj, outputName, layerId, outputPort);
     }
 
 
@@ -809,6 +859,9 @@ public class Net {
     // C++:  void cv::dnn::Net::dumpToFile(String path)
     private static native void dumpToFile_0(long nativeObj, String path);
 
+    // C++:  void cv::dnn::Net::dumpToPbtxt(String path)
+    private static native void dumpToPbtxt_0(long nativeObj, String path);
+
     // C++:  int cv::dnn::Net::getLayerId(String layer)
     private static native int getLayerId_0(long nativeObj, String layer);
 
@@ -826,6 +879,9 @@ public class Net {
 
     // C++:  void cv::dnn::Net::connect(String outPin, String inpPin)
     private static native void connect_0(long nativeObj, String outPin, String inpPin);
+
+    // C++:  int cv::dnn::Net::registerOutput(string outputName, int layerId, int outputPort)
+    private static native int registerOutput_0(long nativeObj, String outputName, int layerId, int outputPort);
 
     // C++:  void cv::dnn::Net::setInputsNames(vector_String inputBlobNames)
     private static native void setInputsNames_0(long nativeObj, List<String> inputBlobNames);
