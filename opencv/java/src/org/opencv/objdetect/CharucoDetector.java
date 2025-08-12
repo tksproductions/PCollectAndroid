@@ -35,7 +35,7 @@ public class CharucoDetector extends Algorithm {
      * @param refineParams marker refine detection parameters
      */
     public CharucoDetector(CharucoBoard board, CharucoParameters charucoParams, DetectorParameters detectorParams, RefineParameters refineParams) {
-        super(CharucoDetector_0(board.nativeObj, charucoParams.nativeObj, detectorParams.nativeObj, refineParams.nativeObj));
+        super(CharucoDetector_0(board.getNativeObjAddr(), charucoParams.getNativeObjAddr(), detectorParams.getNativeObjAddr(), refineParams.getNativeObjAddr()));
     }
 
     /**
@@ -46,7 +46,7 @@ public class CharucoDetector extends Algorithm {
      * @param detectorParams marker detection parameters
      */
     public CharucoDetector(CharucoBoard board, CharucoParameters charucoParams, DetectorParameters detectorParams) {
-        super(CharucoDetector_1(board.nativeObj, charucoParams.nativeObj, detectorParams.nativeObj));
+        super(CharucoDetector_1(board.getNativeObjAddr(), charucoParams.getNativeObjAddr(), detectorParams.getNativeObjAddr()));
     }
 
     /**
@@ -56,7 +56,7 @@ public class CharucoDetector extends Algorithm {
      * @param charucoParams charuco detection parameters
      */
     public CharucoDetector(CharucoBoard board, CharucoParameters charucoParams) {
-        super(CharucoDetector_2(board.nativeObj, charucoParams.nativeObj));
+        super(CharucoDetector_2(board.getNativeObjAddr(), charucoParams.getNativeObjAddr()));
     }
 
     /**
@@ -65,7 +65,7 @@ public class CharucoDetector extends Algorithm {
      * @param board ChAruco board
      */
     public CharucoDetector(CharucoBoard board) {
-        super(CharucoDetector_3(board.nativeObj));
+        super(CharucoDetector_3(board.getNativeObjAddr()));
     }
 
 
@@ -83,7 +83,7 @@ public class CharucoDetector extends Algorithm {
     //
 
     public void setBoard(CharucoBoard board) {
-        setBoard_0(nativeObj, board.nativeObj);
+        setBoard_0(nativeObj, board.getNativeObjAddr());
     }
 
 
@@ -101,7 +101,7 @@ public class CharucoDetector extends Algorithm {
     //
 
     public void setCharucoParameters(CharucoParameters charucoParameters) {
-        setCharucoParameters_0(nativeObj, charucoParameters.nativeObj);
+        setCharucoParameters_0(nativeObj, charucoParameters.getNativeObjAddr());
     }
 
 
@@ -119,7 +119,7 @@ public class CharucoDetector extends Algorithm {
     //
 
     public void setDetectorParameters(DetectorParameters detectorParameters) {
-        setDetectorParameters_0(nativeObj, detectorParameters.nativeObj);
+        setDetectorParameters_0(nativeObj, detectorParameters.getNativeObjAddr());
     }
 
 
@@ -137,7 +137,7 @@ public class CharucoDetector extends Algorithm {
     //
 
     public void setRefineParameters(RefineParameters refineParameters) {
-        setRefineParameters_0(nativeObj, refineParameters.nativeObj);
+        setRefineParameters_0(nativeObj, refineParameters.getNativeObjAddr());
     }
 
 
@@ -166,6 +166,9 @@ public class CharucoDetector extends Algorithm {
      * If camera parameters are provided, the process is based in an approximated pose estimation, else it is based on local homography.
      * Only visible corners are returned. For each corner, its corresponding identifier is also returned in charucoIds.
      * SEE: findChessboardCorners
+     * <b>Note:</b> After OpenCV 4.6.0, there was an incompatible change in the ChArUco pattern generation algorithm for even row counts.
+     * Use cv::aruco::CharucoBoard::setLegacyPattern() to ensure compatibility with patterns created using OpenCV versions prior to 4.6.0.
+     * For more information, see the issue: https://github.com/opencv/opencv/issues/23152
      */
     public void detectBoard(Mat image, Mat charucoCorners, Mat charucoIds, List<Mat> markerCorners, Mat markerIds) {
         Mat markerCorners_mat = Converters.vector_Mat_to_Mat(markerCorners);
@@ -194,6 +197,9 @@ public class CharucoDetector extends Algorithm {
      * If camera parameters are provided, the process is based in an approximated pose estimation, else it is based on local homography.
      * Only visible corners are returned. For each corner, its corresponding identifier is also returned in charucoIds.
      * SEE: findChessboardCorners
+     * <b>Note:</b> After OpenCV 4.6.0, there was an incompatible change in the ChArUco pattern generation algorithm for even row counts.
+     * Use cv::aruco::CharucoBoard::setLegacyPattern() to ensure compatibility with patterns created using OpenCV versions prior to 4.6.0.
+     * For more information, see the issue: https://github.com/opencv/opencv/issues/23152
      */
     public void detectBoard(Mat image, Mat charucoCorners, Mat charucoIds, List<Mat> markerCorners) {
         Mat markerCorners_mat = Converters.vector_Mat_to_Mat(markerCorners);
@@ -221,6 +227,9 @@ public class CharucoDetector extends Algorithm {
      * If camera parameters are provided, the process is based in an approximated pose estimation, else it is based on local homography.
      * Only visible corners are returned. For each corner, its corresponding identifier is also returned in charucoIds.
      * SEE: findChessboardCorners
+     * <b>Note:</b> After OpenCV 4.6.0, there was an incompatible change in the ChArUco pattern generation algorithm for even row counts.
+     * Use cv::aruco::CharucoBoard::setLegacyPattern() to ensure compatibility with patterns created using OpenCV versions prior to 4.6.0.
+     * For more information, see the issue: https://github.com/opencv/opencv/issues/23152
      */
     public void detectBoard(Mat image, Mat charucoCorners, Mat charucoIds) {
         detectBoard_2(nativeObj, image.nativeObj, charucoCorners.nativeObj, charucoIds.nativeObj);
