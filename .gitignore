@@ -16,6 +16,8 @@ local.properties
 
 app/build
 app/release
+opencv/build
+opencv/native
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij
