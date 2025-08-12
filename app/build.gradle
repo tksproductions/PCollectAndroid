@@ -4,8 +4,8 @@ plugins {
 }
 
 android {
-    namespace 'com.tksproductions.pcollect'
-    compileSdk 35
+    compileSdk = 35
+    namespace = 'com.tksproductions.pcollect'
 
     buildFeatures {
         viewBinding = true
@@ -13,8 +13,8 @@ android {
 
     defaultConfig {
         applicationId "com.tksproductions.pcollect"
-        minSdk 24
-        targetSdk 35
+        minSdk = 24
+        targetSdk = 35
         versionCode 4
         versionName "1.3"
 

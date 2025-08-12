@@ -98,7 +98,7 @@ def openCVersionCode = ((4 * 100 + 9) * 100 + 0) * 10 + 0
 println "OpenCV: " +openCVersionName + " " + project.buildscript.sourceFile
 
 android {
-    namespace 'org.opencv'
+    namespace = 'org.opencv'
     compileSdkVersion 31
 
     defaultConfig {
@@ -139,13 +139,13 @@ android {
     }
 
     buildFeatures {
-        aidl true
-        prefabPublishing true
-        buildConfig true
+        aidl = true
+        prefabPublishing = true
+        buildConfig = true
     }
     prefab {
         opencv_jni_shared {
-            headers "native/jni/include"
+            headers = "native/jni/include"
         }
     }
 
