@@ -23,8 +23,8 @@ jobs:
       - name: Set up JDK environment
         uses: actions/setup-java@v4
         with:
-          java-version-file: '.tool-versions'
-          distribution: 'temurin'
+          java-version-file: ".tool-versions"
+          distribution: "temurin"
           cache: gradle
 
       - name: Set up Android SDK
