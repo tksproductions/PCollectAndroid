@@ -37,7 +37,7 @@ jobs:
 
       - name: Set up local.properties
         run: |
-          echo "opencv.dir=$PWD/opencv" >> local.properties
+          echo "opencv.dir=$PWD/opencv/sdk" >> local.properties
 
       - name: Set up JDK environment
         uses: actions/setup-java@v4
