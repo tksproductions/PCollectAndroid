@@ -15,6 +15,7 @@
 local.properties
 .vscode
 .kotlin
+/keystore1.jks
 
 app/build
 app/release
