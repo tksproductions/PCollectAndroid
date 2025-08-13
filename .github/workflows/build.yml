@@ -20,7 +20,7 @@ jobs:
       - name: Check out git repository
         uses: actions/checkout@v4
 
-      - name: Set up our JDK environment
+      - name: Set up JDK environment
         uses: actions/setup-java@v4
         with:
           java-version-file: '.tool-versions'
