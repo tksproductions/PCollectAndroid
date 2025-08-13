@@ -64,4 +64,4 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-caches-
 
       - name: Build Android app bundle
-        run: ./gradlew bundleRelease
+        run: ./gradlew app:bundle
