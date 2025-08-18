@@ -15,7 +15,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwapped: (Int, Int) -> Unit) : RecyclerView.Adapter<IdolAdapter.IdolViewHolder>() {
+class IdolAdapter(
+    private val idolList: MutableList<Idol>,
+    private val onIdolSwapped: (Int, Int) -> Unit
+) : RecyclerView.Adapter<IdolAdapter.IdolViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdolViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_idol, parent, false)
@@ -28,7 +31,9 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
 
     override fun getItemCount(): Int = idolList.size
 
-    inner class IdolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnTouchListener {
+    inner class IdolViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView),
+        View.OnTouchListener {
         private val idolImageView: ImageView = itemView.findViewById(R.id.idolImageView)
         private val idolNameTextView: TextView = itemView.findViewById(R.id.idolNameTextView)
         private var longPressHandler = Handler(Looper.getMainLooper())
@@ -99,7 +104,10 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
         }
 
         private fun deletePhotocards(idolName: String) {
-            val sharedPreferences = itemView.context.getSharedPreferences("PhotocardPrefs", Context.MODE_PRIVATE)
+            val sharedPreferences = itemView.context.getSharedPreferences(
+                "PhotocardPrefs",
+                Context.MODE_PRIVATE
+            )
             val editor = sharedPreferences.edit()
             editor.remove("${idolName}_photocardList")
             editor.apply()

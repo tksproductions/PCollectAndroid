@@ -20,7 +20,9 @@ class WishlistAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WishlistViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_wishlist_photocard, parent, false)
+        val view = LayoutInflater.from(
+            parent.context
+        ).inflate(R.layout.item_wishlist_photocard, parent, false)
         return WishlistViewHolder(view)
     }
 

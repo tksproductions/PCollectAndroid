@@ -74,22 +74,22 @@ class PhotocardCatalogActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        photocardCatalogAdapter = PhotocardCatalogAdapter(photocardList) { selectedPhotocard, isSelected ->
-            if (isSelected) {
-                photocardCatalogAdapter.selectPhotocard(selectedPhotocard)
-            } else {
-                photocardCatalogAdapter.deselectPhotocard(selectedPhotocard)
+        photocardCatalogAdapter =
+            PhotocardCatalogAdapter(photocardList) { selectedPhotocard, isSelected ->
+                if (isSelected) {
+                    photocardCatalogAdapter.selectPhotocard(selectedPhotocard)
+                } else {
+                    photocardCatalogAdapter.deselectPhotocard(selectedPhotocard)
+                }
             }
-        }
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@PhotocardCatalogActivity, 4)
             adapter = photocardCatalogAdapter
         }
     }
 
-    private fun sanitizeSearchName(searchName: String): String {
-        return searchName.replace("\\s".toRegex(), "").replace("[^a-zA-Z0-9]".toRegex(), "").lowercase()
-    }
+    private fun sanitizeSearchName(searchName: String): String =
+        searchName.replace("\\s".toRegex(), "").replace("[^a-zA-Z0-9]".toRegex(), "").lowercase()
 
     private fun performSearch(searchName: String) {
         val sanitizedSearchName = sanitizeSearchName(searchName)
@@ -129,7 +129,9 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         }
 
         for (idolFolder in matchingIdolFolders) {
-            val photocardFiles = assetManager.list("Photocards/$idolFolder")?.sortedWith(NaturalOrderComparator()) ?: continue
+            val photocardFiles =
+                assetManager.list("Photocards/$idolFolder")?.sortedWith(NaturalOrderComparator())
+                    ?: continue
             for (photocardFile in photocardFiles) {
                 photocardList.add(Pair(idolFolder, photocardFile))
             }
@@ -138,7 +140,6 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         showNoResults(false)
         photocardCatalogAdapter.notifyDataSetChanged()
     }
-
 
     private fun showNoResults(show: Boolean) {
         if (show) {
@@ -190,15 +191,15 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             val isSelected = selectedPhotocards.contains(photocard)
             holder.photocardImageView.alpha = if (isSelected) 0.5f else 1.0f
             if (selectedPhotocards.isEmpty()) {
-                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text = "Select All"
+                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text =
+                    "Select All"
             } else {
-                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text = "Add Selected"
+                (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text =
+                    "Add Selected"
             }
         }
 
-        override fun getItemCount(): Int {
-            return photocardList.size
-        }
+        override fun getItemCount(): Int = photocardList.size
 
         fun selectPhotocard(photocard: String) {
             selectedPhotocards.add(photocard)
@@ -210,9 +211,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             notifyDataSetChanged()
         }
 
-        fun getSelectedPhotocards(): Set<String> {
-            return selectedPhotocards
-        }
+        fun getSelectedPhotocards(): Set<String> = selectedPhotocards
         fun selectAllPhotocards() {
             selectedPhotocards.clear()
             for ((idolFolder, photocardName) in photocardList) {

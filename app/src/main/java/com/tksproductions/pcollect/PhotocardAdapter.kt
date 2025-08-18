@@ -59,7 +59,9 @@ class PhotocardAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotocardViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_photocard, parent, false)
+        val view = LayoutInflater.from(
+            parent.context
+        ).inflate(R.layout.item_photocard, parent, false)
         return PhotocardViewHolder(view)
     }
 

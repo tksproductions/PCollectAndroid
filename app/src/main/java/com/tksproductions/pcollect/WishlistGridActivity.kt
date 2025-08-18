@@ -1,21 +1,21 @@
 package com.tksproductions.pcollect
 
+import android.content.Context
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.tksproductions.pcollect.databinding.ActivityWishlistGridBinding
 import kotlin.math.ceil
 import kotlin.math.max
-import android.widget.ImageView
-import com.bumptech.glide.Glide
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import android.net.Uri
-import com.google.gson.GsonBuilder
 
 class WishlistGridActivity : AppCompatActivity() {
 
@@ -52,7 +52,11 @@ class WishlistGridActivity : AppCompatActivity() {
         val screenWidth = resources.displayMetrics.widthPixels.toFloat()
         val frameWidth = screenWidth * 0.95f
         val frameHeight = frameWidth * aspectRatio
-        val (numColumns, imageWidth, imageHeight) = calculateGrid(frameWidth, frameHeight, photocards.size)
+        val (numColumns, imageWidth, imageHeight) = calculateGrid(
+            frameWidth,
+            frameHeight,
+            photocards.size
+        )
 
         wishlistAdapter = WishlistAdapter(photocards, imageWidth, imageHeight)
         binding.recyclerView.apply {
@@ -62,7 +66,11 @@ class WishlistGridActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateGrid(screenWidth: Float, frameHeight: Float, numImages: Int): Triple<Int, Float, Float> {
+    private fun calculateGrid(
+        screenWidth: Float,
+        frameHeight: Float,
+        numImages: Int
+    ): Triple<Int, Float, Float> {
         var bestLayout = Triple(1, screenWidth, screenWidth * 1.5f)
         var maxArea = 0f
 
@@ -105,15 +113,25 @@ class WishlistGridActivity : AppCompatActivity() {
             photocardsCount <= maxCardsForMaxSpacing -> minSpacingForMaxCards
             photocardsCount >= maxCardsForMinSpacing -> minSpacing
             else -> {
-                val slope = (minSpacing - minSpacingForMaxCards) / (maxCardsForMinSpacing - maxCardsForMaxSpacing)
-                max(minSpacingForMaxCards + slope * (photocardsCount - maxCardsForMaxSpacing), minSpacing)
+                val slope =
+                    (minSpacing - minSpacingForMaxCards) /
+                        (maxCardsForMinSpacing - maxCardsForMaxSpacing)
+                max(
+                    minSpacingForMaxCards + slope * (photocardsCount - maxCardsForMaxSpacing),
+                    minSpacing
+                )
             }
         }
     }
 }
 
 class GridSpacingItemDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {
-    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
         outRect.left = spacing
         outRect.right = spacing
         outRect.bottom = spacing
