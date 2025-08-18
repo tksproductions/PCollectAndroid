@@ -35,7 +35,7 @@ jobs:
           chmod a+x ktlint/ktlint
 
       - name: Run ktlint
-        run: ./ktlint/ktlint
+        run: ./ktlint/ktlint app
 
   build:
     name: Android Build
