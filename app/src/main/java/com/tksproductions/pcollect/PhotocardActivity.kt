@@ -17,11 +17,13 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityPhotocardBinding
-import org.opencv.android.OpenCVLoader
 import java.io.File
 import java.io.FileOutputStream
+import org.opencv.android.OpenCVLoader
 
-class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClickListener {
+class PhotocardActivity :
+    AppCompatActivity(),
+    PhotocardAdapter.OnPhotocardClickListener {
 
     private lateinit var binding: ActivityPhotocardBinding
     private lateinit var photocardAdapter: PhotocardAdapter
@@ -60,9 +62,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         }
     }
 
-    override fun isPhotocardSelected(position: Int): Boolean {
-        return selectedPhotocards.contains(position)
-    }
+    override fun isPhotocardSelected(position: Int): Boolean = selectedPhotocards.contains(position)
 
     private fun setupAddPhotocardButton() {
         binding.addPhotocardButton.setOnClickListener {
@@ -87,7 +87,8 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
             sortPhotocards()
             photocardAdapter.notifyDataSetChanged()
         }
-        binding.textNoPhotocards.visibility = if (photocardList.isEmpty()) View.VISIBLE else View.GONE
+        binding.textNoPhotocards.visibility =
+            if (photocardList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     fun savePhotocards() {
@@ -99,7 +100,13 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun showAddPhotocardOptions() {
-        val options = arrayOf("Add from Catalog", "Import from Gallery", "Extract from Template", "Share Wishlist")
+        val options =
+            arrayOf(
+                "Add from Catalog",
+                "Import from Gallery",
+                "Extract from Template",
+                "Share Wishlist"
+            )
         val builder = AlertDialog.Builder(this, R.style.DarkDialogTheme)
         builder.setItems(options) { dialog, which ->
             when (which) {
@@ -157,13 +164,17 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                         for (i in 0 until clipData!!.itemCount) {
                             val selectedImageUri = clipData.getItemAt(i).uri
                             if (selectedImageUri != null) {
-                                photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                                photocardList.add(
+                                    Photocard(selectedImageUri, false, false, "Imported Photocard")
+                                )
                             }
                         }
                     } else if (data.data != null) {
                         val selectedImageUri = data.data
                         if (selectedImageUri != null) {
-                            photocardList.add(Photocard(selectedImageUri, false, false, "Imported Photocard"))
+                            photocardList.add(
+                                Photocard(selectedImageUri, false, false, "Imported Photocard")
+                            )
                         }
                     }
                     sortPhotocards()
@@ -172,9 +183,12 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                     binding.textNoPhotocards.visibility = View.GONE
                 }
                 REQUEST_PHOTOCARD_PICK -> {
-                    val selectedPhotocards = data.getStringArrayListExtra("selectedPhotocards") ?: return
+                    val selectedPhotocards =
+                        data.getStringArrayListExtra("selectedPhotocards") ?: return
                     selectedPhotocards.forEach { photocardName ->
-                        val photocardUri = Uri.parse("file:///android_asset/Photocards/$photocardName")
+                        val photocardUri = Uri.parse(
+                            "file:///android_asset/Photocards/$photocardName"
+                        )
                         println(photocardUri)
                         photocardList.add(Photocard(photocardUri, false, false, photocardName))
                     }
@@ -188,7 +202,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                     if (selectedImageUri != null) {
                         val contentResolver = applicationContext.contentResolver
                         val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
                         extractPhotocardsFromUri(selectedImageUri)
                         binding.textNoPhotocards.visibility = View.GONE
@@ -219,7 +233,11 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
-        val file = File(applicationContext.filesDir, "extracted_photocard_${System.currentTimeMillis()}.jpg")
+        val file =
+            File(
+                applicationContext.filesDir,
+                "extracted_photocard_${System.currentTimeMillis()}.jpg"
+            )
         val outputStream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
         outputStream.flush()
@@ -282,9 +300,11 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun sortPhotocards() {
-        photocardList.sortWith(compareBy<Photocard> { it.isCollected }
-            .thenByDescending { it.isWishlisted }
-            .thenBy { !it.isWishlisted && !it.isCollected })
+        photocardList.sortWith(
+            compareBy<Photocard> { it.isCollected }
+                .thenByDescending { it.isWishlisted }
+                .thenBy { !it.isWishlisted && !it.isCollected }
+        )
     }
 
     companion object {

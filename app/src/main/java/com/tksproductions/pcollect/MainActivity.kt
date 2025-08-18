@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
@@ -23,10 +27,6 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityMainBinding
 import java.io.File
-import android.os.Parcel
-import android.os.Parcelable
-import android.os.Handler
-import android.os.Looper
 
 class MainActivity : AppCompatActivity() {
 
@@ -95,7 +95,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or
+                ItemTouchHelper.RIGHT,
             0
         ) {
             override fun onMove(
@@ -139,7 +140,11 @@ class MainActivity : AppCompatActivity() {
                 val idolName = idolNameEditText.text.toString()
                 if (idolName.isNotEmpty() && selectedImageUri != null) {
                     if (idolList.any { it.name == idolName }) {
-                        Toast.makeText(this, "An idol with this name already exists.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "An idol with this name already exists.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         val newIdol = Idol(idolName, selectedImageUri!!)
                         idolList.add(newIdol)
@@ -149,7 +154,11 @@ class MainActivity : AppCompatActivity() {
                         binding.textWelcome.visibility = View.GONE
                     }
                 } else {
-                    Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Please enter a name and select an image for the idol",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .setNegativeButton("Cancel") { _, _ ->
@@ -183,7 +192,7 @@ class MainActivity : AppCompatActivity() {
             selectedImageUri?.let { uri ->
                 val contentResolver = applicationContext.contentResolver
                 val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 contentResolver.takePersistableUriPermission(uri, takeFlags)
             }
 
@@ -253,14 +262,17 @@ class MainActivity : AppCompatActivity() {
 }
 
 data class Idol(var name: String, var imageUri: Uri)
-data class Photocard(val imageUri: Uri, var isCollected: Boolean, var isWishlisted: Boolean, val name: String)
+data class Photocard(
+    val imageUri: Uri,
+    var isCollected: Boolean,
+    var isWishlisted: Boolean,
+    val name: String
+)
 
 class UriTypeAdapter : TypeAdapter<Uri>() {
     override fun write(out: JsonWriter, value: Uri?) {
         out.value(value.toString())
     }
 
-    override fun read(`in`: JsonReader): Uri {
-        return Uri.parse(`in`.nextString())
-    }
+    override fun read(`in`: JsonReader): Uri = Uri.parse(`in`.nextString())
 }
