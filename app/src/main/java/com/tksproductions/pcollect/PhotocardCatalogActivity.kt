@@ -190,6 +190,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             val photocard = "$idolFolder/$photocardName"
             val isSelected = selectedPhotocards.contains(photocard)
             holder.photocardImageView.alpha = if (isSelected) 0.5f else 1.0f
+            @Suppress("ktlint:standard:max-line-length")
             if (selectedPhotocards.isEmpty()) {
                 (holder.itemView.context as PhotocardCatalogActivity).binding.addSelectedButton.text =
                     "Select All"
