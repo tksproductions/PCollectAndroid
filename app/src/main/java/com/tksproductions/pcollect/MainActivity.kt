@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var longPressedPosition: Int = -1
     private var isDragging = false
     private val handler = Handler(Looper.getMainLooper())
-    private val LONG_PRESS_DELAY = 1500L
+    private val longPressDelay = 1500L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                                         if (!isDragging) {
                                             showDeleteConfirmationDialog(position)
                                         }
-                                    }, LONG_PRESS_DELAY)
+                                    }, longPressDelay)
                                 }
                             }
                         }
