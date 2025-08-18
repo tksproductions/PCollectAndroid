@@ -15,20 +15,31 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwapped: (Int, Int) -> Unit) : RecyclerView.Adapter<IdolAdapter.IdolViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdolViewHolder {
+class IdolAdapter(
+    private val idolList: MutableList<Idol>,
+    private val onIdolSwapped: (Int, Int) -> Unit,
+) : RecyclerView.Adapter<IdolAdapter.IdolViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): IdolViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_idol, parent, false)
         return IdolViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: IdolViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: IdolViewHolder,
+        position: Int,
+    ) {
         holder.bind(idolList[position])
     }
 
     override fun getItemCount(): Int = idolList.size
 
-    inner class IdolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnTouchListener {
+    inner class IdolViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView),
+        View.OnTouchListener {
         private val idolImageView: ImageView = itemView.findViewById(R.id.idolImageView)
         private val idolNameTextView: TextView = itemView.findViewById(R.id.idolNameTextView)
         private var longPressHandler = Handler(Looper.getMainLooper())
@@ -45,15 +56,19 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
             itemView.setOnTouchListener(this)
         }
 
-        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        override fun onTouch(
+            v: View?,
+            event: MotionEvent?,
+        ): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     isDragging = false
-                    longPressRunnable = Runnable {
-                        if (!isDragging) {
-                            showDeleteConfirmationDialog(adapterPosition)
+                    longPressRunnable =
+                        Runnable {
+                            if (!isDragging) {
+                                showDeleteConfirmationDialog(adapterPosition)
+                            }
                         }
-                    }
                     longPressHandler.postDelayed(longPressRunnable!!, 500)
                 }
                 MotionEvent.ACTION_MOVE -> {
@@ -76,13 +91,14 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
 
         private fun showDeleteConfirmationDialog(position: Int) {
             val context = itemView.context
-            deleteConfirmationDialog = AlertDialog.Builder(context, R.style.DarkDialogTheme)
-                .setMessage("Are you sure you want to delete this idol?")
-                .setPositiveButton("Delete") { _, _ ->
-                    deleteIdol(position)
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+            deleteConfirmationDialog =
+                AlertDialog
+                    .Builder(context, R.style.DarkDialogTheme)
+                    .setMessage("Are you sure you want to delete this idol?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        deleteIdol(position)
+                    }.setNegativeButton("Cancel", null)
+                    .show()
         }
 
         private fun dismissDeleteConfirmationDialog() {
@@ -111,7 +127,10 @@ class IdolAdapter(private val idolList: MutableList<Idol>, private val onIdolSwa
         }
     }
 
-    fun onItemMove(fromPosition: Int, toPosition: Int) {
+    fun onItemMove(
+        fromPosition: Int,
+        toPosition: Int,
+    ) {
         val movedIdol = idolList[fromPosition]
         idolList.removeAt(fromPosition)
         idolList.add(toPosition, movedIdol)

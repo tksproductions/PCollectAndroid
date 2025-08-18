@@ -1,30 +1,30 @@
 package com.tksproductions.pcollect
 
+import android.content.Context
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.tksproductions.pcollect.databinding.ActivityWishlistGridBinding
 import kotlin.math.ceil
 import kotlin.math.max
-import android.widget.ImageView
-import com.bumptech.glide.Glide
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import android.net.Uri
-import com.google.gson.GsonBuilder
 
 class WishlistGridActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityWishlistGridBinding
     private lateinit var wishlistAdapter: WishlistAdapter
     private val aspectRatio = 1.0f / 1.0f
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
-        .create()
+    private val gson =
+        GsonBuilder()
+            .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+            .create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +62,11 @@ class WishlistGridActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateGrid(screenWidth: Float, frameHeight: Float, numImages: Int): Triple<Int, Float, Float> {
+    private fun calculateGrid(
+        screenWidth: Float,
+        frameHeight: Float,
+        numImages: Int,
+    ): Triple<Int, Float, Float> {
         var bestLayout = Triple(1, screenWidth, screenWidth * 1.5f)
         var maxArea = 0f
 
@@ -112,8 +116,15 @@ class WishlistGridActivity : AppCompatActivity() {
     }
 }
 
-class GridSpacingItemDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {
-    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+class GridSpacingItemDecoration(
+    private val spacing: Int,
+) : RecyclerView.ItemDecoration() {
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State,
+    ) {
         outRect.left = spacing
         outRect.right = spacing
         outRect.bottom = spacing

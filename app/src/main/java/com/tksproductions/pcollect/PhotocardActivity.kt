@@ -21,16 +21,18 @@ import org.opencv.android.OpenCVLoader
 import java.io.File
 import java.io.FileOutputStream
 
-class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClickListener {
-
+class PhotocardActivity :
+    AppCompatActivity(),
+    PhotocardAdapter.OnPhotocardClickListener {
     private lateinit var binding: ActivityPhotocardBinding
     private lateinit var photocardAdapter: PhotocardAdapter
     private val photocardList = mutableListOf<Photocard>()
     private val selectedPhotocards = mutableListOf<Int>()
     private lateinit var idolName: String
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
-        .create()
+    private val gson =
+        GsonBuilder()
+            .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+            .create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +62,7 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         }
     }
 
-    override fun isPhotocardSelected(position: Int): Boolean {
-        return selectedPhotocards.contains(position)
-    }
+    override fun isPhotocardSelected(position: Int): Boolean = selectedPhotocards.contains(position)
 
     private fun setupAddPhotocardButton() {
         binding.addPhotocardButton.setOnClickListener {
@@ -147,7 +147,11 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         startActivityForResult(intent, REQUEST_TEMPLATE_IMPORT)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && data != null) {
             when (requestCode) {
@@ -187,7 +191,8 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
                     val selectedImageUri = data.data
                     if (selectedImageUri != null) {
                         val contentResolver = applicationContext.contentResolver
-                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        val takeFlags: Int =
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         contentResolver.takePersistableUriPermission(selectedImageUri, takeFlags)
                         extractPhotocardsFromUri(selectedImageUri)
@@ -264,7 +269,10 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
         builder.show()
     }
 
-    private fun categorizePhotocards(isCollected: Boolean, isWishlisted: Boolean) {
+    private fun categorizePhotocards(
+        isCollected: Boolean,
+        isWishlisted: Boolean,
+    ) {
         selectedPhotocards.forEach { position ->
             photocardList[position].isCollected = isCollected
             photocardList[position].isWishlisted = isWishlisted
@@ -282,9 +290,11 @@ class PhotocardActivity : AppCompatActivity(), PhotocardAdapter.OnPhotocardClick
     }
 
     private fun sortPhotocards() {
-        photocardList.sortWith(compareBy<Photocard> { it.isCollected }
-            .thenByDescending { it.isWishlisted }
-            .thenBy { !it.isWishlisted && !it.isCollected })
+        photocardList.sortWith(
+            compareBy<Photocard> { it.isCollected }
+                .thenByDescending { it.isWishlisted }
+                .thenBy { !it.isWishlisted && !it.isCollected },
+        )
     }
 
     companion object {

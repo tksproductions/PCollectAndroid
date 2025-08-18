@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
@@ -23,21 +27,17 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.tksproductions.pcollect.databinding.ActivityMainBinding
 import java.io.File
-import android.os.Parcel
-import android.os.Parcelable
-import android.os.Handler
-import android.os.Looper
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var idolAdapter: IdolAdapter
     private val idolList = mutableListOf<Idol>()
     private var selectedImageUri: Uri? = null
     private lateinit var addButton: View
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
-        .create()
+    private val gson =
+        GsonBuilder()
+            .registerTypeAdapter(Uri::class.java, UriTypeAdapter())
+            .create()
 
     private var deleteConfirmationDialog: AlertDialog? = null
     private var longPressedPosition: Int = -1
@@ -53,66 +53,78 @@ class MainActivity : AppCompatActivity() {
         val dexOutputDir: File = codeCacheDir
         dexOutputDir.setReadOnly()
 
-        idolAdapter = IdolAdapter(idolList) { fromPosition, toPosition ->
-            onIdolSwapped(fromPosition, toPosition)
-        }
+        idolAdapter =
+            IdolAdapter(idolList) { fromPosition, toPosition ->
+                onIdolSwapped(fromPosition, toPosition)
+            }
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@MainActivity, 2)
             adapter = idolAdapter
-            addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
-                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-                    when (e.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            val childView = rv.findChildViewUnder(e.x, e.y)
-                            if (childView != null) {
-                                val position = rv.getChildAdapterPosition(childView)
-                                if (position != RecyclerView.NO_POSITION) {
-                                    longPressedPosition = position
-                                    isDragging = false
-                                    handler.postDelayed({
-                                        if (!isDragging) {
-                                            showDeleteConfirmationDialog(position)
-                                        }
-                                    }, LONG_PRESS_DELAY)
+            addOnItemTouchListener(
+                object : RecyclerView.SimpleOnItemTouchListener() {
+                    override fun onInterceptTouchEvent(
+                        rv: RecyclerView,
+                        e: MotionEvent,
+                    ): Boolean {
+                        when (e.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                val childView = rv.findChildViewUnder(e.x, e.y)
+                                if (childView != null) {
+                                    val position = rv.getChildAdapterPosition(childView)
+                                    if (position != RecyclerView.NO_POSITION) {
+                                        longPressedPosition = position
+                                        isDragging = false
+                                        handler.postDelayed({
+                                            if (!isDragging) {
+                                                showDeleteConfirmationDialog(position)
+                                            }
+                                        }, LONG_PRESS_DELAY)
+                                    }
                                 }
                             }
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            if (!isDragging) {
-                                isDragging = true
+                            MotionEvent.ACTION_MOVE -> {
+                                if (!isDragging) {
+                                    isDragging = true
+                                    handler.removeCallbacksAndMessages(null)
+                                    dismissDeleteConfirmationDialog()
+                                }
+                            }
+                            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                                 handler.removeCallbacksAndMessages(null)
-                                dismissDeleteConfirmationDialog()
+                                longPressedPosition = -1
                             }
                         }
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            handler.removeCallbacksAndMessages(null)
-                            longPressedPosition = -1
-                        }
+                        return false
                     }
-                    return false
-                }
-            })
+                },
+            )
         }
 
-        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
-            0
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                val fromPosition = viewHolder.adapterPosition
-                val toPosition = target.adapterPosition
-                idolAdapter.onItemMove(fromPosition, toPosition)
-                return true
-            }
+        val itemTouchHelper =
+            ItemTouchHelper(
+                object : ItemTouchHelper.SimpleCallback(
+                    ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+                    0,
+                ) {
+                    override fun onMove(
+                        recyclerView: RecyclerView,
+                        viewHolder: RecyclerView.ViewHolder,
+                        target: RecyclerView.ViewHolder,
+                    ): Boolean {
+                        val fromPosition = viewHolder.adapterPosition
+                        val toPosition = target.adapterPosition
+                        idolAdapter.onItemMove(fromPosition, toPosition)
+                        return true
+                    }
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // Not used
-            }
-        })
+                    override fun onSwiped(
+                        viewHolder: RecyclerView.ViewHolder,
+                        direction: Int,
+                    ) {
+                        // Not used
+                    }
+                },
+            )
         itemTouchHelper.attachToRecyclerView(binding.recyclerView)
 
         binding.btnAddIdol.setOnClickListener {
@@ -133,29 +145,29 @@ class MainActivity : AppCompatActivity() {
         selectImageTextView.visibility = View.VISIBLE
         idolImageView.setImageDrawable(null)
 
-        alertDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
-            .setView(dialogView)
-            .setPositiveButton("Add") { _, _ ->
-                val idolName = idolNameEditText.text.toString()
-                if (idolName.isNotEmpty() && selectedImageUri != null) {
-                    if (idolList.any { it.name == idolName }) {
-                        Toast.makeText(this, "An idol with this name already exists.", Toast.LENGTH_SHORT).show()
+        alertDialog =
+            AlertDialog
+                .Builder(this, R.style.DarkDialogTheme)
+                .setView(dialogView)
+                .setPositiveButton("Add") { _, _ ->
+                    val idolName = idolNameEditText.text.toString()
+                    if (idolName.isNotEmpty() && selectedImageUri != null) {
+                        if (idolList.any { it.name == idolName }) {
+                            Toast.makeText(this, "An idol with this name already exists.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val newIdol = Idol(idolName, selectedImageUri!!)
+                            idolList.add(newIdol)
+                            saveIdols()
+                            idolAdapter.notifyItemInserted(idolList.size - 1)
+                            selectedImageUri = null
+                            binding.textWelcome.visibility = View.GONE
+                        }
                     } else {
-                        val newIdol = Idol(idolName, selectedImageUri!!)
-                        idolList.add(newIdol)
-                        saveIdols()
-                        idolAdapter.notifyItemInserted(idolList.size - 1)
-                        selectedImageUri = null
-                        binding.textWelcome.visibility = View.GONE
+                        Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "Please enter a name and select an image for the idol", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel") { _, _ ->
-                selectedImageUri = null
-            }
-            .create()
+                }.setNegativeButton("Cancel") { _, _ ->
+                    selectedImageUri = null
+                }.create()
 
         idolImageView.setOnClickListener {
             openImagePicker()
@@ -171,7 +183,11 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_IMAGE_PICK)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
             selectedImageUri = data.data
@@ -182,7 +198,8 @@ class MainActivity : AppCompatActivity() {
 
             selectedImageUri?.let { uri ->
                 val contentResolver = applicationContext.contentResolver
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                val takeFlags: Int =
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 contentResolver.takePersistableUriPermission(uri, takeFlags)
             }
@@ -205,7 +222,10 @@ class MainActivity : AppCompatActivity() {
         binding.textWelcome.visibility = if (idolList.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    private fun onIdolSwapped(fromPosition: Int, toPosition: Int) {
+    private fun onIdolSwapped(
+        fromPosition: Int,
+        toPosition: Int,
+    ) {
         saveIdols()
     }
 
@@ -218,13 +238,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog(position: Int) {
-        deleteConfirmationDialog = AlertDialog.Builder(this, R.style.DarkDialogTheme)
-            .setMessage("Are you sure you want to delete this idol?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteIdol(position)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        deleteConfirmationDialog =
+            AlertDialog
+                .Builder(this, R.style.DarkDialogTheme)
+                .setMessage("Are you sure you want to delete this idol?")
+                .setPositiveButton("Delete") { _, _ ->
+                    deleteIdol(position)
+                }.setNegativeButton("Cancel", null)
+                .show()
     }
 
     private fun dismissDeleteConfirmationDialog() {
@@ -252,15 +273,25 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-data class Idol(var name: String, var imageUri: Uri)
-data class Photocard(val imageUri: Uri, var isCollected: Boolean, var isWishlisted: Boolean, val name: String)
+data class Idol(
+    var name: String,
+    var imageUri: Uri,
+)
+
+data class Photocard(
+    val imageUri: Uri,
+    var isCollected: Boolean,
+    var isWishlisted: Boolean,
+    val name: String,
+)
 
 class UriTypeAdapter : TypeAdapter<Uri>() {
-    override fun write(out: JsonWriter, value: Uri?) {
+    override fun write(
+        out: JsonWriter,
+        value: Uri?,
+    ) {
         out.value(value.toString())
     }
 
-    override fun read(`in`: JsonReader): Uri {
-        return Uri.parse(`in`.nextString())
-    }
+    override fun read(`in`: JsonReader): Uri = Uri.parse(`in`.nextString())
 }

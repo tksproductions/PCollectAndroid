@@ -12,10 +12,11 @@ import com.bumptech.glide.Glide
 
 class PhotocardAdapter(
     private val photocardList: MutableList<Photocard>,
-    private val onPhotocardClickListener: OnPhotocardClickListener
+    private val onPhotocardClickListener: OnPhotocardClickListener,
 ) : RecyclerView.Adapter<PhotocardAdapter.PhotocardViewHolder>() {
-
-    inner class PhotocardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class PhotocardViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         val photocardImageView: ImageView = itemView.findViewById(R.id.photocardImageView)
         val photocardBorder: View = itemView.findViewById(R.id.photocardBorder)
 
@@ -30,8 +31,12 @@ class PhotocardAdapter(
             }
         }
 
-        fun bind(photocard: Photocard, isSelected: Boolean) {
-            Glide.with(itemView)
+        fun bind(
+            photocard: Photocard,
+            isSelected: Boolean,
+        ) {
+            Glide
+                .with(itemView)
                 .load(photocard.imageUri)
                 .into(photocardImageView)
 
@@ -58,30 +63,42 @@ class PhotocardAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotocardViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): PhotocardViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_photocard, parent, false)
         return PhotocardViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PhotocardViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: PhotocardViewHolder,
+        position: Int,
+    ) {
         val isSelected = onPhotocardClickListener.isPhotocardSelected(position)
         holder.bind(photocardList[position], isSelected)
     }
 
     override fun getItemCount(): Int = photocardList.size
 
-    private fun showDeleteConfirmationDialog(position: Int, photocardImageView: ImageView) {
+    private fun showDeleteConfirmationDialog(
+        position: Int,
+        photocardImageView: ImageView,
+    ) {
         val context = photocardImageView.context
-        AlertDialog.Builder(context, R.style.DarkDialogTheme)
+        AlertDialog
+            .Builder(context, R.style.DarkDialogTheme)
             .setMessage("Are you sure you want to delete this photocard?")
             .setPositiveButton("Delete") { _, _ ->
                 deletePhotocard(position, photocardImageView)
-            }
-            .setNegativeButton("Cancel", null)
+            }.setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun deletePhotocard(position: Int, photocardImageView: ImageView) {
+    private fun deletePhotocard(
+        position: Int,
+        photocardImageView: ImageView,
+    ) {
         photocardList.removeAt(position)
         notifyItemRemoved(position)
         (photocardImageView.context as? PhotocardActivity)?.savePhotocards()
@@ -89,6 +106,7 @@ class PhotocardAdapter(
 
     interface OnPhotocardClickListener {
         fun onPhotocardClick(position: Int)
+
         fun isPhotocardSelected(position: Int): Boolean
     }
 }

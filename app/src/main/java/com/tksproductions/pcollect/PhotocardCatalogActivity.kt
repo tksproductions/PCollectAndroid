@@ -17,7 +17,6 @@ import com.bumptech.glide.Glide
 import com.tksproductions.pcollect.databinding.ActivityPhotocardCatalogBinding
 
 class PhotocardCatalogActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityPhotocardCatalogBinding
     private lateinit var photocardCatalogAdapter: PhotocardCatalogAdapter
     private val photocardList = mutableListOf<Pair<String, String>>()
@@ -38,21 +37,23 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         binding.searchView.setQuery(initialSearchName, false)
         performSearch(initialSearchName)
 
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    performSearch(it)
+        binding.searchView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    query?.let {
+                        performSearch(it)
+                    }
+                    return true
                 }
-                return true
-            }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    performSearch(it)
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    newText?.let {
+                        performSearch(it)
+                    }
+                    return true
                 }
-                return true
-            }
-        })
+            },
+        )
 
         binding.addSelectedButton.setOnClickListener {
             val selectedPhotocards = photocardCatalogAdapter.getSelectedPhotocards()
@@ -74,22 +75,22 @@ class PhotocardCatalogActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        photocardCatalogAdapter = PhotocardCatalogAdapter(photocardList) { selectedPhotocard, isSelected ->
-            if (isSelected) {
-                photocardCatalogAdapter.selectPhotocard(selectedPhotocard)
-            } else {
-                photocardCatalogAdapter.deselectPhotocard(selectedPhotocard)
+        photocardCatalogAdapter =
+            PhotocardCatalogAdapter(photocardList) { selectedPhotocard, isSelected ->
+                if (isSelected) {
+                    photocardCatalogAdapter.selectPhotocard(selectedPhotocard)
+                } else {
+                    photocardCatalogAdapter.deselectPhotocard(selectedPhotocard)
+                }
             }
-        }
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@PhotocardCatalogActivity, 4)
             adapter = photocardCatalogAdapter
         }
     }
 
-    private fun sanitizeSearchName(searchName: String): String {
-        return searchName.replace("\\s".toRegex(), "").replace("[^a-zA-Z0-9]".toRegex(), "").lowercase()
-    }
+    private fun sanitizeSearchName(searchName: String): String =
+        searchName.replace("\\s".toRegex(), "").replace("[^a-zA-Z0-9]".toRegex(), "").lowercase()
 
     private fun performSearch(searchName: String) {
         val sanitizedSearchName = sanitizeSearchName(searchName)
@@ -108,19 +109,21 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         val assetManager = assets
         val idolFolders = assetManager.list("Photocards") ?: return
 
-        val exactMatchIdolFolder = idolFolders.find { idolFolder ->
-            val sanitizedIdolName = sanitizeSearchName(idolFolder)
-            sanitizedIdolName == sanitizedSearchName
-        }
-
-        val matchingIdolFolders = if (exactMatchIdolFolder != null) {
-            listOf(exactMatchIdolFolder)
-        } else {
-            idolFolders.filter { idolFolder ->
+        val exactMatchIdolFolder =
+            idolFolders.find { idolFolder ->
                 val sanitizedIdolName = sanitizeSearchName(idolFolder)
-                sanitizedIdolName.startsWith(sanitizedSearchName)
+                sanitizedIdolName == sanitizedSearchName
             }
-        }
+
+        val matchingIdolFolders =
+            if (exactMatchIdolFolder != null) {
+                listOf(exactMatchIdolFolder)
+            } else {
+                idolFolders.filter { idolFolder ->
+                    val sanitizedIdolName = sanitizeSearchName(idolFolder)
+                    sanitizedIdolName.startsWith(sanitizedSearchName)
+                }
+            }
 
         if (matchingIdolFolders.isEmpty()) {
             showNoResults(true)
@@ -139,7 +142,6 @@ class PhotocardCatalogActivity : AppCompatActivity() {
         photocardCatalogAdapter.notifyDataSetChanged()
     }
 
-
     private fun showNoResults(show: Boolean) {
         if (show) {
             binding.recyclerView.visibility = View.GONE
@@ -152,12 +154,13 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 
     inner class PhotocardCatalogAdapter(
         private val photocardList: List<Pair<String, String>>,
-        private val onItemClick: (String, Boolean) -> Unit
+        private val onItemClick: (String, Boolean) -> Unit,
     ) : RecyclerView.Adapter<PhotocardCatalogAdapter.ViewHolder>() {
-
         private val selectedPhotocards = mutableSetOf<String>()
 
-        inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        inner class ViewHolder(
+            itemView: View,
+        ) : RecyclerView.ViewHolder(itemView) {
             val photocardImageView: ImageView = itemView.findViewById(R.id.photocardImageView)
 
             init {
@@ -173,16 +176,25 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val itemView = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_photocard_catalog, parent, false)
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ): ViewHolder {
+            val itemView =
+                LayoutInflater
+                    .from(parent.context)
+                    .inflate(R.layout.item_photocard_catalog, parent, false)
             return ViewHolder(itemView)
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        override fun onBindViewHolder(
+            holder: ViewHolder,
+            position: Int,
+        ) {
             val (idolFolder, photocardName) = photocardList[position]
             val photocardUri = "file:///android_asset/Photocards/$idolFolder/$photocardName"
-            Glide.with(holder.itemView)
+            Glide
+                .with(holder.itemView)
                 .load(photocardUri)
                 .into(holder.photocardImageView)
 
@@ -196,9 +208,7 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             }
         }
 
-        override fun getItemCount(): Int {
-            return photocardList.size
-        }
+        override fun getItemCount(): Int = photocardList.size
 
         fun selectPhotocard(photocard: String) {
             selectedPhotocards.add(photocard)
@@ -210,9 +220,8 @@ class PhotocardCatalogActivity : AppCompatActivity() {
             notifyDataSetChanged()
         }
 
-        fun getSelectedPhotocards(): Set<String> {
-            return selectedPhotocards
-        }
+        fun getSelectedPhotocards(): Set<String> = selectedPhotocards
+
         fun selectAllPhotocards() {
             selectedPhotocards.clear()
             for ((idolFolder, photocardName) in photocardList) {
@@ -227,7 +236,10 @@ class PhotocardCatalogActivity : AppCompatActivity() {
 class NaturalOrderComparator : Comparator<String> {
     private val numberPattern = Regex("\\d+")
 
-    override fun compare(o1: String?, o2: String?): Int {
+    override fun compare(
+        o1: String?,
+        o2: String?,
+    ): Int {
         if (o1 == null || o2 == null) {
             return if (o1 == null) -1 else 1
         }

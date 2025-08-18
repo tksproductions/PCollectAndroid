@@ -11,22 +11,30 @@ import com.bumptech.glide.Glide
 class WishlistAdapter(
     private val photocards: List<Photocard>,
     private val photocardWidth: Float,
-    private val photocardHeight: Float
+    private val photocardHeight: Float,
 ) : RecyclerView.Adapter<WishlistAdapter.WishlistViewHolder>() {
-
-    inner class WishlistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class WishlistViewHolder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         val photocardImageView: ImageView = itemView.findViewById(R.id.photocardImageView)
         val photocardCardView: CardView = itemView.findViewById(R.id.photocardCardView)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WishlistViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): WishlistViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_wishlist_photocard, parent, false)
         return WishlistViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: WishlistViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: WishlistViewHolder,
+        position: Int,
+    ) {
         val photocard = photocards[position]
-        Glide.with(holder.itemView)
+        Glide
+            .with(holder.itemView)
             .load(photocard.imageUri)
             .into(holder.photocardImageView)
 
@@ -42,7 +50,10 @@ class WishlistAdapter(
         }
     }
 
-    private fun calculateCornerRadius(imageWidth: Int, imageHeight: Int): Float {
+    private fun calculateCornerRadius(
+        imageWidth: Int,
+        imageHeight: Int,
+    ): Float {
         val minDimension = minOf(imageWidth, imageHeight)
         val cornerRadiusRatio = 0.12f
         return minDimension * cornerRadiusRatio
