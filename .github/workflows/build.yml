@@ -12,6 +12,31 @@ on:
       - synchronize
 
 jobs:
+  lint:
+    name: Kotlin lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Cache ktlint
+        id: cache-ktlint
+        uses: actions/cache@v4
+        with:
+          path: ktlint
+          key: ktlint-1.7.1
+
+      - name: Download ktlint
+        if: steps.cache-ktlint.outputs.cache-hit != 'true'
+        run: |
+          mkdir ktlint
+          curl -sSL https://github.com/pinterest/ktlint/releases/download/1.7.1/ktlint -o ktlint/ktlint
+          chmod a+x ktlint/ktlint
+
+      - name: Run ktlint
+        run: ./ktlint
+
   build:
     name: Android Build
     runs-on: ubuntu-latest
